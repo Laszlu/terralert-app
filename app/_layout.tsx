@@ -54,10 +54,10 @@ export default function RootLayout() {
                         style={styles.map}
                         provider={PROVIDER_GOOGLE}
                         initialRegion={{
-                            latitude: 37.78825,
-                            longitude: -122.4324,
-                            latitudeDelta: 0.0922,
-                            longitudeDelta: 0.0421,
+                            latitude: 10,
+                            longitude: 140,
+                            latitudeDelta: 30,
+                            longitudeDelta: 20,
                         }}>
                         {marker.map((m, index) => (
                             <Marker key={index} coordinate={{ latitude: m.latitude, longitude: m.longitude }} title={m.title} description={m.description}/>
