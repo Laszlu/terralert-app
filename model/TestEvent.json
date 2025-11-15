@@ -1,0 +1,424 @@
+{
+  "id": "EONET_15859",
+  "title": "Typhoon Fung-wong",
+  "description": null,
+  "link": "https://eonet.gsfc.nasa.gov/api/v3/events/EONET_15859",
+  "closed": null,
+  "categories": [
+    {
+      "id": "severeStorms",
+      "title": "Severe Storms"
+    }
+  ],
+  "sources": [
+    {
+      "id": "JTWC",
+      "url": "https://www.metoc.navy.mil/jtwc/products/wp3225.tcw"
+    }
+  ],
+  "geometry": [
+    {
+      "magnitudeValue": 35.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-06T00:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          140.8,
+          9.6
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 40.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-06T06:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          140.6,
+          9.7
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 40.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-06T12:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          139.6,
+          10.2
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 45.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-06T18:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          138.6,
+          10.7
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 55.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-07T00:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          137.9,
+          11.4
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 60.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-07T06:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          136.6,
+          11.6
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 65.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-07T12:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          135.4,
+          11.9
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 70.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-07T18:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          133.8,
+          12.2
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 80.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-08T00:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          132.1,
+          12.5
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 90.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-08T06:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          130.6,
+          13.0
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 95.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-08T12:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          128.1,
+          13.3
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 110.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-08T18:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          126.6,
+          13.7
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 110.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-09T00:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          124.8,
+          14.0
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 115.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-09T06:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          123.2,
+          14.9
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 100.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-09T12:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          121.8,
+          16.1
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 95.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-09T18:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          120.3,
+          16.5
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 85.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-10T00:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          119.2,
+          17.3
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 70.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-10T06:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          118.8,
+          17.6
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 70.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-10T12:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          118.5,
+          18.5
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 65.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-10T18:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          118.3,
+          18.8
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 65.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-11T00:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          118.4,
+          19.4
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 55.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-11T06:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          118.6,
+          20.1
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 50.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-11T12:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          119.1,
+          20.6
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 50.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-11T18:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          119.1,
+          21.3
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 45.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-12T00:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          119.3,
+          21.4
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 45.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-12T06:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          119.8,
+          21.8
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 40.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-12T12:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          120.6,
+          22.2
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 35.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-12T18:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          121.8,
+          23.1
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 35.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-13T00:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          122.8,
+          24.4
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 35.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-13T06:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          125.3,
+          25.8
+        ],
+        "PolygonCoordinates": null
+      }
+    },
+    {
+      "magnitudeValue": 30.0,
+      "magnitudeUnit": "kts",
+      "date": "2025-11-13T12:00:00Z",
+      "type": "Point",
+      "coordinates": {
+        "PointCoordinates": [
+          128.3,
+          26.3
+        ],
+        "PolygonCoordinates": null
+      }
+    }
+  ]
+}

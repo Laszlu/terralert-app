@@ -5,17 +5,37 @@ import {useColorScheme} from '@/hooks/use-color-scheme';
 import {ThemedView} from "@/components/themed-view";
 import {ThemedText} from "@/components/themed-text";
 import {Animated, StyleSheet, useWindowDimensions, View} from "react-native";
-import MapView, {PROVIDER_GOOGLE} from "react-native-maps";
+import MapView, {Marker, PROVIDER_GOOGLE, LatLng} from "react-native-maps";
 import ThemedButton from "@/components/themed-button";
 import OptionsStack from "@/components/option-stack";
 import {useState} from "react";
+
+import testEvent from '../model/TestEvent.json'
+import {TerralertEvent} from "@/model/Event";
+import {geometryToMarkers, parseTerralertEvent} from "@/model/TerralertEventHelper";
 
 
 export default function RootLayout() {
     const colorScheme = useColorScheme();
     const {height, width, scale, fontScale} = useWindowDimensions();
 
-    const [menuVisibility, toggleMenuVisibility] = useState(false)
+    const [menuVisibility, toggleMenuVisibility] = useState(false);
+
+    const parsedEvent: TerralertEvent = parseTerralertEvent(testEvent);
+
+    const terralertCoordinates = parsedEvent.geometry[0].coordinates[0];
+
+    let coordinates: any = null
+
+    if (terralertCoordinates.pointCoordinates != null) {
+        coordinates = terralertCoordinates.pointCoordinates;
+    } else if (terralertCoordinates.polygonCoordinates != null) {
+        coordinates = terralertCoordinates.polygonCoordinates;
+    }
+
+    const latLng: LatLng = coordinates;
+
+    const marker = geometryToMarkers(parsedEvent.geometry);
 
     return (
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -39,6 +59,9 @@ export default function RootLayout() {
                             latitudeDelta: 0.0922,
                             longitudeDelta: 0.0421,
                         }}>
+                        {marker.map((m, index) => (
+                            <Marker key={index} coordinate={{ latitude: m.latitude, longitude: m.longitude }} title={m.title} description={m.description}/>
+                        ))}
                     </MapView>
                 </ThemedView>
 
