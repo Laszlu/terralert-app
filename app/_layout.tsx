@@ -26,12 +26,14 @@ export default function RootLayout() {
     const {height, width, scale, fontScale} = useWindowDimensions();
 
     const [category, setCategory] = useState('vo');
+    const [region, setRegion] = useState(null);
     const [menuVisibility, toggleMenuVisibility] = useState(false);
     const [eventData, setEventData] = useState<TerralertEvent[] | null>(null);
     const [markers, setMarkers] = useState<TerralertMapMarker[]>([])
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<unknown>(null);
 
+    // Test Data
     const parsedEvent: TerralertEvent = parseTerralertEvent(testEvent);
     const marker = geometryToMarkers(parsedEvent.geometry);
 
@@ -138,7 +140,7 @@ const styles = StyleSheet.create({
 
     menuBar: {
         flexDirection: "row",
-        justifyContent: "space-around",
+        justifyContent: "space-between",
         alignItems: "center",
         backgroundColor: "rgba(240,240,240,1)", // sample bg to visualize
         borderWidth: 1,
