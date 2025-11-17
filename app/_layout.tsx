@@ -1,4 +1,4 @@
-import {DarkTheme, DefaultTheme, ThemeProvider} from '@react-navigation/native';
+import {ThemeProvider, useTheme} from '@react-navigation/native';
 import 'react-native-reanimated';
 
 import {useColorScheme} from '@/hooks/use-color-scheme';
@@ -19,19 +19,32 @@ import {
     TerralertMapMarker
 } from "@/model/terralert-event-helper";
 import {getCurrentEvents} from "@/api/terralert-client";
+import {TerralertRegion} from "@/model/terralert-region-helper";
+import {CustomDarkTheme, CustomDefaultTheme} from "@/constants/CustomTheme";
+import MenuBar, {MenuActions} from "@/components/menu-bar";
 
 
 export default function RootLayout() {
+    // Config
     const colorScheme = useColorScheme();
+    const theme = colorScheme === "dark" ? CustomDarkTheme : CustomDefaultTheme;
+    const { colors } = useTheme();
     const {height, width, scale, fontScale} = useWindowDimensions();
 
+    // States
     const [category, setCategory] = useState('vo');
-    const [region, setRegion] = useState(null);
+    const [region, setRegion] = useState<TerralertRegion | null>(null);
     const [menuVisibility, toggleMenuVisibility] = useState(false);
     const [eventData, setEventData] = useState<TerralertEvent[] | null>(null);
     const [markers, setMarkers] = useState<TerralertMapMarker[]>([])
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<unknown>(null);
+
+    const actions: MenuActions = {
+        changeCategory: () => toggleMenuVisibility(v => !v),
+        changeRegion: () => console.log("Regions clicked"),
+        openSettings: () => console.log("Settings opened"),
+    };
 
     // Test Data
     const parsedEvent: TerralertEvent = parseTerralertEvent(testEvent);
@@ -59,7 +72,7 @@ export default function RootLayout() {
     }, [eventData])
 
     return (
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <ThemeProvider value={theme}>
             <ThemedView style={styles.mainContainer}>
                 <ThemedView style={[styles.optionsContainer, menuVisibility ? styles.display_true : styles.display_false]}>
                     <OptionsStack options={[
@@ -87,12 +100,7 @@ export default function RootLayout() {
                 </ThemedView>
 
                 <ThemedView style={styles.menuBarContainer}>
-                    <ThemedView style={styles.menuBar}>
-                        <ThemedButton title={"Btn1"} onPress={() => {toggleMenuVisibility(!menuVisibility)}}></ThemedButton>
-                        <ThemedButton title={"Btn2"} onPress={() => {}}></ThemedButton>
-                        <ThemedButton title={"Btn3"} onPress={() => {}}></ThemedButton>
-                        <ThemedButton title={"Btn4"} onPress={() => {}}></ThemedButton>
-                    </ThemedView>
+                    <MenuBar actions={actions}/>
                 </ThemedView>
 
             </ThemedView>
@@ -141,13 +149,13 @@ const styles = StyleSheet.create({
     menuBar: {
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "center",
-        backgroundColor: "rgba(240,240,240,1)", // sample bg to visualize
+        alignItems: "center", // sample bg to visualize
         borderWidth: 1,
         borderColor: "rgba(0,0,0,0.2)",
-        width: "95%",
-        padding: 30,
-        borderRadius: 10,
+        width: "100%",
+        paddingTop: 10,
+        paddingBottom: 20,
+        paddingHorizontal: 40,
     },
 
     mapContainer: {

@@ -2,9 +2,11 @@ import React from 'react';
 import {Pressable, StyleSheet} from 'react-native';
 import {ThemedText} from './themed-text';
 import {useTheme} from '@react-navigation/native';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 type ThemedButtonProps = {
     title: string;
+    iconName: keyof typeof MaterialIcons.glyphMap;
     onPress: () => void;
 }
 
@@ -16,7 +18,8 @@ export function ThemedButton(props: ThemedButtonProps) {
             onPress={() => {props.onPress()}}
             style={styles.button}
         >
-            <ThemedText style={{ color: colors.text }}>
+            <MaterialIcons name={props.iconName} size={30} color={colors.text}/>
+            <ThemedText style={{ color: colors.text, fontWeight: "bold", fontSize: 14 }}>
                 {props.title}
             </ThemedText>
         </Pressable>
