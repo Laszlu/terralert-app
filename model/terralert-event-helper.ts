@@ -1,4 +1,4 @@
-import {TerralertEvent, Category, Source, TerralertGeometry, TerralertCoordinates} from "@/model/Event";
+import {TerralertEvent, Category, Source, TerralertGeometry, TerralertCoordinates} from "@/model/event";
 
 type RawCoordinateObj = {
     PointCoordinates?: number[] | null;
@@ -6,7 +6,7 @@ type RawCoordinateObj = {
     [k: string]: any;
 };
 
-export type MapMarker = {
+export type TerralertMapMarker = {
     latitude: number;
     longitude: number;
     title?: string;
@@ -64,8 +64,50 @@ export function parseTerralertEvent(jsonEvent: any): TerralertEvent {
     );
 }
 
-export function geometryToMarkers(geometry: TerralertGeometry[]): MapMarker[] {
-    const markers: MapMarker[] = [];
+export function parseTerralertEvents(jsonArray: any[]): TerralertEvent[] {
+    return jsonArray.map(item => parseTerralertEvent(item));
+}
+
+export function getMarkersForEvents(events: TerralertEvent[]): TerralertMapMarker[] {
+    const markers: TerralertMapMarker[] = [];
+
+    events.forEach(event => {
+        let marker = getMarkerForEvent(event);
+        if (marker != null) {
+            markers.push(marker)
+        }
+    });
+
+    return markers;
+}
+
+export function getMarkerForEvent(event: TerralertEvent): TerralertMapMarker | null {
+    const geometryCount = event.geometry.length;
+    const currentGeometry = event.geometry[geometryCount - 1];
+    let marker: TerralertMapMarker;
+
+    for (const coord of currentGeometry.coordinates) {
+        if (coord.pointCoordinates && coord.pointCoordinates.length === 2) {
+            const [lon, lat] = coord.pointCoordinates;
+
+            marker = {
+                latitude: lat,
+                longitude: lon,
+                magnitudeValue: currentGeometry.magnitudeValue ?? null,
+                date: currentGeometry.date ?? null,
+                title: `${event.title ?? "Event"}`,
+                description: ` ${currentGeometry.date ?? ""} ${currentGeometry.magnitudeValue != null ? "- " + currentGeometry.magnitudeValue : ""}${currentGeometry.magnitudeUnit ?? ""}`
+            }
+
+            return marker;
+        }
+    }
+
+    return null;
+}
+
+export function geometryToMarkers(geometry: TerralertGeometry[]): TerralertMapMarker[] {
+    const markers: TerralertMapMarker[] = [];
 
     geometry.forEach(g => {
         g.coordinates.forEach(coord => {

@@ -5,37 +5,56 @@ import {useColorScheme} from '@/hooks/use-color-scheme';
 import {ThemedView} from "@/components/themed-view";
 import {ThemedText} from "@/components/themed-text";
 import {Animated, StyleSheet, useWindowDimensions, View} from "react-native";
-import MapView, {Marker, PROVIDER_GOOGLE, LatLng} from "react-native-maps";
+import MapView, {Marker, PROVIDER_GOOGLE, LatLng, MapMarker} from "react-native-maps";
 import ThemedButton from "@/components/themed-button";
 import OptionsStack from "@/components/option-stack";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 import testEvent from '../model/TestEvent.json'
-import {TerralertEvent} from "@/model/Event";
-import {geometryToMarkers, parseTerralertEvent} from "@/model/TerralertEventHelper";
+import {TerralertEvent} from "@/model/event";
+import {
+    geometryToMarkers,
+    getMarkersForEvents,
+    parseTerralertEvent,
+    TerralertMapMarker
+} from "@/model/terralert-event-helper";
+import {getCurrentEvents} from "@/api/terralert-client";
 
 
 export default function RootLayout() {
     const colorScheme = useColorScheme();
     const {height, width, scale, fontScale} = useWindowDimensions();
 
+    const [category, setCategory] = useState('vo');
     const [menuVisibility, toggleMenuVisibility] = useState(false);
+    const [eventData, setEventData] = useState<TerralertEvent[] | null>(null);
+    const [markers, setMarkers] = useState<TerralertMapMarker[]>([])
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<unknown>(null);
 
     const parsedEvent: TerralertEvent = parseTerralertEvent(testEvent);
-
-    const terralertCoordinates = parsedEvent.geometry[0].coordinates[0];
-
-    let coordinates: any = null
-
-    if (terralertCoordinates.pointCoordinates != null) {
-        coordinates = terralertCoordinates.pointCoordinates;
-    } else if (terralertCoordinates.polygonCoordinates != null) {
-        coordinates = terralertCoordinates.polygonCoordinates;
-    }
-
-    const latLng: LatLng = coordinates;
-
     const marker = geometryToMarkers(parsedEvent.geometry);
+
+    useEffect(() => {
+        async function load() {
+            try {
+                const events = await getCurrentEvents(category);
+                setEventData(events);
+            } catch (error) {
+                setError(error);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        load();
+    }, [category])
+
+    useEffect( () => {
+        if (eventData != null) {
+            setMarkers(getMarkersForEvents(eventData))
+        }
+    }, [eventData])
 
     return (
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -56,10 +75,10 @@ export default function RootLayout() {
                         initialRegion={{
                             latitude: 10,
                             longitude: 140,
-                            latitudeDelta: 30,
-                            longitudeDelta: 20,
+                            latitudeDelta: 130,
+                            longitudeDelta: 80,
                         }}>
-                        {marker.map((m, index) => (
+                        {markers.map((m, index) => (
                             <Marker key={index} coordinate={{ latitude: m.latitude, longitude: m.longitude }} title={m.title} description={m.description}/>
                         ))}
                     </MapView>
