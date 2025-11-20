@@ -74,14 +74,6 @@ export default function RootLayout() {
     return (
         <ThemeProvider value={theme}>
             <ThemedView style={styles.mainContainer}>
-                <ThemedView style={[styles.optionsContainer, menuVisibility ? styles.display_true : styles.display_false]}>
-                    <OptionsStack options={[
-                        {iconSize: 50, iconColor: '#808080', iconPath: 'option', label: 'Option 1', onPress: () => console.log("Option 1 pressed")},
-                        {iconSize: 50, iconColor: '#808080', iconPath: 'option', label: 'Option 2', onPress: () => console.log("Option 2 pressed")},
-                        {iconSize: 50, iconColor: '#808080', iconPath: 'option', label: 'Option 3', onPress: () => console.log("Option 3 pressed")},
-                        {iconSize: 50, iconColor: '#808080', iconPath: 'option', label: 'Option 4', onPress: () => console.log("Option 4 pressed")},
-                    ]}/>
-                </ThemedView>
 
                 <ThemedView style={styles.mapContainer}>
                     <MapView
@@ -100,6 +92,14 @@ export default function RootLayout() {
                 </ThemedView>
 
                 <ThemedView style={styles.menuBarContainer}>
+                    <ThemedView style={[styles.optionsContainer, menuVisibility ? styles.display_true : styles.display_false]}>
+                        <OptionsStack options={[
+                            {iconSize: 50, iconColor: '#808080', iconPath: 'option', label: 'Option 1', onPress: () => console.log("Option 1 pressed")},
+                            {iconSize: 50, iconColor: '#808080', iconPath: 'option', label: 'Option 2', onPress: () => console.log("Option 2 pressed")},
+                            {iconSize: 50, iconColor: '#808080', iconPath: 'option', label: 'Option 3', onPress: () => console.log("Option 3 pressed")},
+                            {iconSize: 50, iconColor: '#808080', iconPath: 'option', label: 'Option 4', onPress: () => console.log("Option 4 pressed")},
+                        ]}/>
+                    </ThemedView>
                     <MenuBar actions={actions}/>
                 </ThemedView>
 
@@ -116,13 +116,8 @@ const styles = StyleSheet.create({
     },
 
     optionsContainer: {
-        position: "absolute",
         width: "100%",
-        top: 0,
-        left: 0,
-        paddingHorizontal: 0,
         flexDirection: "row",
-        zIndex: 100,
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "rgba(0,0,0,0.0)",

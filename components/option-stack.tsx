@@ -38,11 +38,9 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-around",
         alignItems: "center",
-        width: '95%',
+        width: '100%',
         marginTop: 70,
         paddingVertical: 10,
-        backgroundColor: "rgba(240,240,240,1)",
-        borderRadius: 10,
         borderColor: "rgba(0,0,0,0.2)",
         borderWidth: 1,
     }
