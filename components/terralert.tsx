@@ -1,13 +1,11 @@
-import {ThemeProvider, useTheme} from '@react-navigation/native';
+import {useTheme} from '@react-navigation/native';
 import 'react-native-reanimated';
 
 import {useColorScheme} from '@/hooks/use-color-scheme';
 import {ThemedView} from "@/components/themed-view";
-import {ThemedText} from "@/components/themed-text";
-import {Animated, StyleSheet, useWindowDimensions, View} from "react-native";
-import MapView, {Marker, PROVIDER_GOOGLE, LatLng, MapMarker} from "react-native-maps";
-import ThemedButton from "@/components/themed-button";
-import OptionsStack, {OptionItem} from "@/components/option-stack";
+import {StyleSheet, useWindowDimensions} from "react-native";
+import MapView, {Marker, PROVIDER_GOOGLE, } from "react-native-maps";
+import {OptionsStack, OptionItem} from "@/components/option-stack";
 import {useEffect, useRef, useState} from "react";
 
 import testEvent from '../model/TestEvent.json'

@@ -1,5 +1,3 @@
-import {Region} from "react-native-maps";
-
 export interface TerralertRegion {
     name: string;
     description: string;
