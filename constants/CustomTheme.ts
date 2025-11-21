@@ -5,6 +5,7 @@ export const CustomDefaultTheme = {
     colors: {
         ...DefaultTheme.colors,
         text: '#412B25',
+        notification: 'rgba(65,43,37,0.8)',
         background: 'rgb(244,239,228)',
     },
 };
@@ -14,6 +15,7 @@ export const CustomDarkTheme = {
     colors: {
         ...DarkTheme.colors,
         tex: 'rgb(244,239,228)',
+        notification: 'rgba(244,239,228, 0.8)',
         background: '#412B25',
     },
 };

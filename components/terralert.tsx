@@ -12,7 +12,7 @@ import testEvent from '../model/TestEvent.json'
 import {TerralertEvent} from "@/model/event";
 import {
     geometryToMarkers,
-    getMarkersForEvents,
+    getMarkersForEvents, parseCategoryToFullName,
     parseTerralertEvent,
     TerralertMapMarker
 } from "@/model/terralert-event-helper";
@@ -21,6 +21,7 @@ import {regionToBoundingBoxCoords, TerralertRegion} from "@/model/terralert-regi
 import {CustomDarkTheme, CustomDefaultTheme} from "@/constants/CustomTheme";
 import MenuBar, {MenuActions} from "@/components/menu-bar";
 import {useCategoryState} from "@/components/category-state-context";
+import {ThemedText} from "@/components/themed-text";
 
 export default function Terralert() {
     const colorScheme = useColorScheme();
@@ -76,6 +77,11 @@ export default function Terralert() {
             toggleCategoryMenuVisibility(false);
             toggleRegionMenuVisibility(v => !v);
         },
+        openHistory: () => {
+            console.log("History opened");
+            toggleCategoryMenuVisibility(false);
+            toggleRegionMenuVisibility(false);
+        },
         openSettings: () => console.log("Settings opened"),
     };
 
@@ -90,7 +96,7 @@ export default function Terralert() {
             const coords = regionToBoundingBoxCoords(region);
 
             mapRef.current?.fitToCoordinates(coords, {
-                edgePadding: {top: 0, right: 0, bottom: 0, left: 0},
+                edgePadding: {top: 30, right: 30, bottom: 30, left: 30},
                 animated: true,
             });
         }
@@ -99,6 +105,7 @@ export default function Terralert() {
     useEffect(() => {
         async function load() {
             try {
+                console.log("Loading events for Category: ", category.category);
                 const events = await getCurrentEvents(category);
                 setEventData(events);
             } catch (error) {
@@ -144,6 +151,14 @@ export default function Terralert() {
                 <ThemedView style={[styles.optionsContainer, regionMenuVisibility ? styles.display_true : styles.display_false]}>
                     <OptionsStack options={regionOptions}/>
                 </ThemedView>
+                <ThemedView style={[styles.statusBar, {backgroundColor: colors.background}]}>
+                    <ThemedText style={[styles.statusBarText, {color: colors.notification}]}>
+                        {"CATEGORY: " + parseCategoryToFullName(category.category).toUpperCase()}
+                    </ThemedText>
+                    <ThemedText style={[styles.statusBarText, {color: colors.notification}]}>
+                        {"REGION: " + (region !== null ? region.description.toUpperCase() : "NONE")}
+                    </ThemedText>
+                </ThemedView>
                 <MenuBar actions={actions}/>
             </ThemedView>
 
@@ -152,10 +167,27 @@ export default function Terralert() {
 }
 
 const styles = StyleSheet.create({
+    display_true: {
+        display: "flex",
+    },
+
+    display_false: {
+        display: "none",
+    },
+
     mainContainer: {
         flex: 1,
         paddingTop: 0,
         paddingBottom: 0
+    },
+
+    mapContainer: {
+        flex: 1,
+        position: "relative"
+    },
+
+    map: {
+        ...StyleSheet.absoluteFillObject,
     },
 
     optionsContainer: {
@@ -166,12 +198,23 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(0,0,0,0.0)",
     },
 
-    display_true: {
-        display: "flex",
+    statusBarText: {
+        fontWeight: "bold",
+        fontSize: 12,
+        marginHorizontal: 5,
     },
 
-    display_false: {
-        display: "none",
+    statusBar: {
+        width: "100%",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingVertical: 2,
+        paddingHorizontal: 5,
+        borderTopWidth: 1,
+        borderBottomWidth: 0.5,
+        borderColor: "rgba(0,0,0,0.2)",
+        height: "auto"
     },
 
     menuBarContainer: {
@@ -183,26 +226,5 @@ const styles = StyleSheet.create({
         left: 0,
         zIndex: 100,
         height: 'auto'
-    },
-
-    menuBar: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center", // sample bg to visualize
-        borderWidth: 1,
-        borderColor: "rgba(0,0,0,0.2)",
-        width: "100%",
-        paddingTop: 10,
-        paddingBottom: 20,
-        paddingHorizontal: 40,
-    },
-
-    mapContainer: {
-        flex: 1,
-        position: "relative"
-    },
-
-    map: {
-        ...StyleSheet.absoluteFillObject,
     },
 });

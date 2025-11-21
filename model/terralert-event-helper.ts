@@ -68,6 +68,19 @@ export function parseTerralertEvents(jsonArray: any[]): TerralertEvent[] {
     return jsonArray.map(item => parseTerralertEvent(item));
 }
 
+export function parseCategoryToFullName(category: string): string {
+    switch (category) {
+        case "st":
+            return "storms";
+        case "ea":
+            return "earthquakes";
+        case "vo":
+            return "volcanoes";
+        default:
+            return "";
+    }
+}
+
 export function getMarkersForEvents(events: TerralertEvent[]): TerralertMapMarker[] {
     const markers: TerralertMapMarker[] = [];
 
