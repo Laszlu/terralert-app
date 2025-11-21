@@ -5,7 +5,7 @@ import {SFSymbols6_0} from "sf-symbols-typescript";
 import {useTheme} from "@react-navigation/native";
 
 // Define the type for one menu option
-type OptionItem = {
+export type OptionItem = {
     iconSize: number;
     iconColor: string;
     iconPath: SFSymbols6_0;
@@ -27,7 +27,7 @@ export function OptionsStack(optionsStackProps: OptionsStackProps) {
                 <TouchableOpacity
                     key={index}
                     onPress={item.onPress}
-                    style={{alignItems: "center", justifyContent: "center"}}
+                    style={{width: "100%", alignItems: "center", justifyContent: "flex-start", flexDirection: 'row'}}
                 >
                     <IconSymbol size={item.iconSize} color={item.iconColor} name={item.iconPath}></IconSymbol>
                     <Text style={{marginLeft: 10}}>{item.label}</Text>
@@ -39,7 +39,7 @@ export function OptionsStack(optionsStackProps: OptionsStackProps) {
 
 const styles = StyleSheet.create({
     optionsView: {
-        flexDirection: "row",
+        flexDirection: "column",
         justifyContent: "space-between",
         alignItems: "center",
         width: '100%',
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         borderColor: "rgba(0,0,0,0.2)",
         borderWidth: 1,
-        paddingHorizontal: 40,
+        paddingHorizontal: "30%",
     }
 })
 

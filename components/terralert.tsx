@@ -7,8 +7,8 @@ import {ThemedText} from "@/components/themed-text";
 import {Animated, StyleSheet, useWindowDimensions, View} from "react-native";
 import MapView, {Marker, PROVIDER_GOOGLE, LatLng, MapMarker} from "react-native-maps";
 import ThemedButton from "@/components/themed-button";
-import OptionsStack from "@/components/option-stack";
-import {useEffect, useState} from "react";
+import OptionsStack, {OptionItem} from "@/components/option-stack";
+import {useEffect, useRef, useState} from "react";
 
 import testEvent from '../model/TestEvent.json'
 import {TerralertEvent} from "@/model/event";
@@ -19,7 +19,7 @@ import {
     TerralertMapMarker
 } from "@/model/terralert-event-helper";
 import {getCurrentEvents} from "@/api/terralert-client";
-import {TerralertRegion} from "@/model/terralert-region-helper";
+import {regionToBoundingBoxCoords, TerralertRegion} from "@/model/terralert-region-helper";
 import {CustomDarkTheme, CustomDefaultTheme} from "@/constants/CustomTheme";
 import MenuBar, {MenuActions} from "@/components/menu-bar";
 import {useCategoryState} from "@/components/category-state-context";
@@ -33,21 +33,70 @@ export default function Terralert() {
     // States
     const {category, setCategory} = useCategoryState();
     const [region, setRegion] = useState<TerralertRegion | null>(null);
-    const [menuVisibility, toggleMenuVisibility] = useState(false);
+    const [categoryMenuVisibility, toggleCategoryMenuVisibility] = useState(false);
+    const [regionMenuVisibility, toggleRegionMenuVisibility] = useState(false);
     const [eventData, setEventData] = useState<TerralertEvent[] | null>(null);
     const [markers, setMarkers] = useState<TerralertMapMarker[]>([])
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<unknown>(null);
 
+    const categoryOptions: OptionItem[] = [
+        {
+            iconSize: 40, iconColor: colors.text, iconPath: 'option', label: 'Storms', onPress: () => {
+                setCategory("st");
+                toggleCategoryMenuVisibility(false);
+            }
+        },
+        {
+            iconSize: 40, iconColor: colors.text, iconPath: 'option', label: 'Earthquakes', onPress: () => {
+                setCategory("ea");
+                toggleCategoryMenuVisibility(false);
+            }
+        },
+        {
+            iconSize: 40, iconColor: colors.text, iconPath: 'option', label: 'Volcanoes', onPress: () => {
+                setCategory("vo");
+                toggleCategoryMenuVisibility(false);
+            }
+        }]
+
+    const regionOptions: OptionItem[] = category.regions.map(region => (
+        {
+            iconSize: 40, iconColor: colors.text, iconPath: 'map', label: region.description, onPress: () => {
+                setRegion(region);
+                toggleRegionMenuVisibility(false);
+            }
+        }
+    ));
+
     const actions: MenuActions = {
-        changeCategory: () => toggleMenuVisibility(v => !v),
-        changeRegion: () => console.log("Regions clicked"),
+        changeCategory: () => {
+            toggleRegionMenuVisibility(false);
+            toggleCategoryMenuVisibility(v => !v);
+        },
+        changeRegion: () => {
+            toggleCategoryMenuVisibility(false);
+            toggleRegionMenuVisibility(v => !v);
+        },
         openSettings: () => console.log("Settings opened"),
     };
 
     // Test Data
     const parsedEvent: TerralertEvent = parseTerralertEvent(testEvent);
     const marker = geometryToMarkers(parsedEvent.geometry);
+
+    const mapRef = useRef<MapView>(null);
+
+    useEffect(() => {
+        if (region !== null) {
+            const coords = regionToBoundingBoxCoords(region);
+
+            mapRef.current?.fitToCoordinates(coords, {
+                edgePadding: {top: 0, right: 0, bottom: 0, left: 0},
+                animated: true,
+            });
+        }
+    }, [region]);
 
     useEffect(() => {
         async function load() {
@@ -77,11 +126,12 @@ export default function Terralert() {
                 <MapView
                     style={styles.map}
                     provider={PROVIDER_GOOGLE}
+                    ref={mapRef}
                     initialRegion={{
-                        latitude: 10,
-                        longitude: 140,
-                        latitudeDelta: 130,
-                        longitudeDelta: 80,
+                        latitude: -25,
+                        longitude: -165,
+                        latitudeDelta: 65,
+                        longitudeDelta: 117,
                     }}>
                     {markers.map((m, index) => (
                         <Marker key={index} coordinate={{ latitude: m.latitude, longitude: m.longitude }} title={m.title} description={m.description}/>
@@ -90,21 +140,11 @@ export default function Terralert() {
             </ThemedView>
 
             <ThemedView style={styles.menuBarContainer}>
-                <ThemedView style={[styles.optionsContainer, menuVisibility ? styles.display_true : styles.display_false]}>
-                    <OptionsStack options={[
-                        {iconSize: 50, iconColor: '#808080', iconPath: 'option', label: 'Storms', onPress: () => {
-                                setCategory("st");
-                                toggleMenuVisibility(false);
-                            }},
-                        {iconSize: 50, iconColor: '#808080', iconPath: 'option', label: 'Earthquakes', onPress: () => {
-                                setCategory("ea");
-                                toggleMenuVisibility(false);
-                            }},
-                        {iconSize: 50, iconColor: '#808080', iconPath: 'option', label: 'Volcanoes', onPress: () => {
-                                setCategory("vo");
-                                toggleMenuVisibility(false);
-                            }}
-                    ]}/>
+                <ThemedView style={[styles.optionsContainer, categoryMenuVisibility ? styles.display_true : styles.display_false]}>
+                    <OptionsStack options={categoryOptions}/>
+                </ThemedView>
+                <ThemedView style={[styles.optionsContainer, regionMenuVisibility ? styles.display_true : styles.display_false]}>
+                    <OptionsStack options={regionOptions}/>
                 </ThemedView>
                 <MenuBar actions={actions}/>
             </ThemedView>
@@ -143,7 +183,8 @@ const styles = StyleSheet.create({
         position: "absolute",
         bottom: 0,
         left: 0,
-        zIndex: 100
+        zIndex: 100,
+        height: 'auto'
     },
 
     menuBar: {

@@ -1,7 +1,9 @@
 import { createContext, useContext, useState, ReactNode } from "react";
+import {getRegionsForCategory, TerralertRegion} from "@/model/terralert-region-helper";
 
 export type CategoryState = {
     category: string;
+    regions: TerralertRegion[];
 }
 
 export type CategoryStateContextType = {
@@ -16,12 +18,17 @@ type CategoryStateProviderProps = {
 const CategoryStateContext = createContext<CategoryStateContextType | undefined>(undefined);
 
 export function CategoryStateProvider({children} : CategoryStateProviderProps) {
-    const [state, setState] = useState<CategoryState>({
-        category: "st"
-    });
+    const [state, setState] = useState<CategoryState>(() => ({
+        category: "st",
+        regions: getRegionsForCategory("st")
+    }));
 
     const setCategoryState = (category: string) => {
-        setState((prevState) => ({...prevState, category: category}));
+        setState((prevState) => ({
+            ...prevState,
+            category: category,
+            regions: getRegionsForCategory(category)
+        }));
     }
 
     return (
