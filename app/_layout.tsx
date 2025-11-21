@@ -2,7 +2,7 @@ import {ThemeProvider} from '@react-navigation/native';
 import 'react-native-reanimated';
 
 import {useColorScheme} from '@/hooks/use-color-scheme';
-import Terralert from "@/app/terralert";
+import Terralert from "@/components/terralert";
 import {CustomDarkTheme, CustomDefaultTheme} from "@/constants/CustomTheme";
 import {CategoryStateProvider} from "@/components/category-state-context";
 
