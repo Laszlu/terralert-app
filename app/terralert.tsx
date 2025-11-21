@@ -92,9 +92,18 @@ export default function Terralert() {
             <ThemedView style={styles.menuBarContainer}>
                 <ThemedView style={[styles.optionsContainer, menuVisibility ? styles.display_true : styles.display_false]}>
                     <OptionsStack options={[
-                        {iconSize: 50, iconColor: '#808080', iconPath: 'option', label: 'Storms', onPress: () => setCategory("st")},
-                        {iconSize: 50, iconColor: '#808080', iconPath: 'option', label: 'Earthquakes', onPress: () => setCategory("ea")},
-                        {iconSize: 50, iconColor: '#808080', iconPath: 'option', label: 'Volcanoes', onPress: () => setCategory("vo")}
+                        {iconSize: 50, iconColor: '#808080', iconPath: 'option', label: 'Storms', onPress: () => {
+                                setCategory("st");
+                                toggleMenuVisibility(false);
+                            }},
+                        {iconSize: 50, iconColor: '#808080', iconPath: 'option', label: 'Earthquakes', onPress: () => {
+                                setCategory("ea");
+                                toggleMenuVisibility(false);
+                            }},
+                        {iconSize: 50, iconColor: '#808080', iconPath: 'option', label: 'Volcanoes', onPress: () => {
+                                setCategory("vo");
+                                toggleMenuVisibility(false);
+                            }}
                     ]}/>
                 </ThemedView>
                 <MenuBar actions={actions}/>
