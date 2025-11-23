@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from "react";
-import {getRegionsForCategory, TerralertRegion} from "@/model/terralert-region-helper";
+import {getRegionsForCategory, TerralertRegion} from "@/helper/terralert-region-helper";
 
 export type CategoryState = {
     category: string;

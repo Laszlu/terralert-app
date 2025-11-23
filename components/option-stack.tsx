@@ -3,12 +3,17 @@ import React from "react";
 import {IconSymbol} from "@/components/ui/icon-symbol";
 import {SFSymbols6_0} from "sf-symbols-typescript";
 import {useTheme} from "@react-navigation/native";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import {IconLibraries, IconName} from "@/helper/ui-helper";
+import IconComponent from "@/components/icon-component";
 
 // Define the type for one menu option
 export type OptionItem = {
     iconSize: number;
     iconColor: string;
-    iconPath: SFSymbols6_0;
+    iconPath: IconName;
+    iconLibrary: IconLibraries;
     label: string;
     onPress: () => void;
 };
@@ -21,6 +26,7 @@ type OptionsStackProps = {
 export function OptionsStack(optionsStackProps: OptionsStackProps) {
     const {colors} = useTheme()
 
+
     return(
         <View style={[styles.optionsView, {backgroundColor: colors.background}]}>
             {optionsStackProps.options.map((item, index) => (
@@ -29,7 +35,7 @@ export function OptionsStack(optionsStackProps: OptionsStackProps) {
                     onPress={item.onPress}
                     style={{width: "100%", alignItems: "center", justifyContent: "flex-start", flexDirection: 'row'}}
                 >
-                    <IconSymbol size={item.iconSize} color={item.iconColor} name={item.iconPath}></IconSymbol>
+                    <IconComponent library={item.iconLibrary} name={item.iconPath} size={item.iconSize} color={item.iconColor}/>
                     <Text style={{marginLeft: 10}}>{item.label}</Text>
                 </TouchableOpacity>
             ))}

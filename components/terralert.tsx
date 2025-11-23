@@ -3,7 +3,7 @@ import 'react-native-reanimated';
 
 import {useColorScheme} from '@/hooks/use-color-scheme';
 import {ThemedView} from "@/components/themed-view";
-import {StyleSheet, useWindowDimensions} from "react-native";
+import {Image, StyleSheet, useWindowDimensions} from "react-native";
 import MapView, {Marker, PROVIDER_GOOGLE, } from "react-native-maps";
 import {OptionsStack, OptionItem} from "@/components/option-stack";
 import {useEffect, useRef, useState} from "react";
@@ -12,16 +12,18 @@ import testEvent from '../model/TestEvent.json'
 import {TerralertEvent} from "@/model/event";
 import {
     geometryToMarkers,
-    getMarkersForEvents, parseCategoryToFullName,
+    getMarkersForEvents,
     parseTerralertEvent,
     TerralertMapMarker
-} from "@/model/terralert-event-helper";
+} from "@/helper/terralert-event-helper";
+import {icons, parseCategoryToFullName} from "@/helper/ui-helper";
 import {getCurrentEvents} from "@/api/terralert-client";
-import {regionToBoundingBoxCoords, TerralertRegion} from "@/model/terralert-region-helper";
+import {regionToBoundingBoxCoords, TerralertRegion} from "@/helper/terralert-region-helper";
 import {CustomDarkTheme, CustomDefaultTheme} from "@/constants/CustomTheme";
 import MenuBar, {MenuActions} from "@/components/menu-bar";
 import {useCategoryState} from "@/components/category-state-context";
 import {ThemedText} from "@/components/themed-text";
+import {Asset} from "expo-asset";
 
 export default function Terralert() {
     const colorScheme = useColorScheme();
@@ -39,21 +41,22 @@ export default function Terralert() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<unknown>(null);
 
+    // Menus
     const categoryOptions: OptionItem[] = [
         {
-            iconSize: 40, iconColor: colors.text, iconPath: 'option', label: 'Storms', onPress: () => {
+            iconSize: 40, iconColor: colors.text, iconPath: 'storm', iconLibrary: "MaterialIcons",  label: 'Storms', onPress: () => {
                 setCategory("st");
                 toggleCategoryMenuVisibility(false);
             }
         },
         {
-            iconSize: 40, iconColor: colors.text, iconPath: 'option', label: 'Earthquakes', onPress: () => {
+            iconSize: 40, iconColor: colors.text, iconPath: 'image-broken-variant', iconLibrary: "MaterialCommunityIcons", label: 'Earthquakes', onPress: () => {
                 setCategory("ea");
                 toggleCategoryMenuVisibility(false);
             }
         },
         {
-            iconSize: 40, iconColor: colors.text, iconPath: 'option', label: 'Volcanoes', onPress: () => {
+            iconSize: 40, iconColor: colors.text, iconPath: 'volcano', iconLibrary: "MaterialIcons", label: 'Volcanoes', onPress: () => {
                 setCategory("vo");
                 toggleCategoryMenuVisibility(false);
             }
@@ -61,7 +64,7 @@ export default function Terralert() {
 
     const regionOptions: OptionItem[] = category.regions.map(region => (
         {
-            iconSize: 40, iconColor: colors.text, iconPath: 'map', label: region.description, onPress: () => {
+            iconSize: 40, iconColor: colors.text, iconPath: 'map-outline', iconLibrary: "MaterialCommunityIcons", label: region.description, onPress: () => {
                 setRegion(region);
                 toggleRegionMenuVisibility(false);
             }
@@ -89,7 +92,14 @@ export default function Terralert() {
     const parsedEvent: TerralertEvent = parseTerralertEvent(testEvent);
     const marker = geometryToMarkers(parsedEvent.geometry);
 
+    // Map View
     const mapRef = useRef<MapView>(null);
+
+    Asset.loadAsync(Object.values(icons));
+
+    const onRegionChange = (region: TerralertRegion | null) => {
+        setRegion(region);
+    }
 
     useEffect(() => {
         if (region !== null) {
@@ -137,9 +147,16 @@ export default function Terralert() {
                         longitude: -165,
                         latitudeDelta: 65,
                         longitudeDelta: 117,
+                    }}
+                    onRegionChange={(region, details) => {
+                        if(details.isGesture) {
+                            onRegionChange(null)
+                        }
                     }}>
                     {markers.map((m, index) => (
-                        <Marker key={index} coordinate={{ latitude: m.latitude, longitude: m.longitude }} title={m.title} description={m.description}/>
+                        <Marker key={index} coordinate={{ latitude: m.latitude, longitude: m.longitude }} title={m.title} description={m.description}>
+                            <Image source={m.image} style={{width: 30, height: 30, resizeMode:"contain"}}/>
+                        </Marker>
                     ))}
                 </MapView>
             </ThemedView>
@@ -151,7 +168,7 @@ export default function Terralert() {
                 <ThemedView style={[styles.optionsContainer, regionMenuVisibility ? styles.display_true : styles.display_false]}>
                     <OptionsStack options={regionOptions}/>
                 </ThemedView>
-                <ThemedView style={[styles.statusBar, {backgroundColor: colors.background}]}>
+                <ThemedView style={[styles.statusBar, {backgroundColor: colors.background, borderColor: colors.text}]}>
                     <ThemedText style={[styles.statusBarText, {color: colors.notification}]}>
                         {"CATEGORY: " + parseCategoryToFullName(category.category).toUpperCase()}
                     </ThemedText>
@@ -212,8 +229,7 @@ const styles = StyleSheet.create({
         paddingVertical: 2,
         paddingHorizontal: 5,
         borderTopWidth: 1,
-        borderBottomWidth: 0.5,
-        borderColor: "rgba(0,0,0,0.2)",
+        borderBottomWidth: 0.2,
         height: "auto"
     },
 

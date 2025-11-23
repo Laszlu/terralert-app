@@ -1,4 +1,7 @@
 import {TerralertEvent, Category, Source, TerralertGeometry, TerralertCoordinates} from "@/model/event";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import {ImageURISource} from "react-native";
+import {getImageForEventByCategory} from "@/helper/ui-helper";
 
 type RawCoordinateObj = {
     PointCoordinates?: number[] | null;
@@ -13,6 +16,7 @@ export type TerralertMapMarker = {
     description?: string;
     magnitudeValue?: number | null;
     date?: string | null;
+    image?: number | ImageURISource | undefined;
 };
 
 export function parseTerralertEvent(jsonEvent: any): TerralertEvent {
@@ -68,19 +72,6 @@ export function parseTerralertEvents(jsonArray: any[]): TerralertEvent[] {
     return jsonArray.map(item => parseTerralertEvent(item));
 }
 
-export function parseCategoryToFullName(category: string): string {
-    switch (category) {
-        case "st":
-            return "storms";
-        case "ea":
-            return "earthquakes";
-        case "vo":
-            return "volcanoes";
-        default:
-            return "";
-    }
-}
-
 export function getMarkersForEvents(events: TerralertEvent[]): TerralertMapMarker[] {
     const markers: TerralertMapMarker[] = [];
 
@@ -109,7 +100,8 @@ export function getMarkerForEvent(event: TerralertEvent): TerralertMapMarker | n
                 magnitudeValue: currentGeometry.magnitudeValue ?? null,
                 date: currentGeometry.date ?? null,
                 title: `${event.title ?? "Event"}`,
-                description: ` ${currentGeometry.date ?? ""} ${currentGeometry.magnitudeValue != null ? "- " + currentGeometry.magnitudeValue : ""}${currentGeometry.magnitudeUnit ?? ""}`
+                description: ` ${currentGeometry.date ?? ""} ${currentGeometry.magnitudeValue != null ? "- " + currentGeometry.magnitudeValue : ""}${currentGeometry.magnitudeUnit ?? ""}`,
+                image: getImageForEventByCategory(event.categories[0])
             }
 
             return marker;

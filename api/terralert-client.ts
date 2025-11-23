@@ -1,5 +1,5 @@
 import {TerralertEvent} from "@/model/event";
-import {parseTerralertEvents} from "@/model/terralert-event-helper";
+import {parseTerralertEvents} from "@/helper/terralert-event-helper";
 import {CategoryState} from "@/components/category-state-context";
 
 const baseUri = 'http://localhost:5210';
