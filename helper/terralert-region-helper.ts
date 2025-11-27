@@ -70,8 +70,20 @@ export function getRegionsForCategory(category: string): TerralertRegion[] {
 }
 
 export function regionToBoundingBoxCoords(region: TerralertRegion) {
+    let clampedRegion = clampRegionLat(region);
+
     return [
-        { latitude: region.minLatitude, longitude: region.minLongitude },
-        { latitude: region.maxLatitude, longitude: region.maxLongitude },
+        { latitude: clampedRegion.minLatitude, longitude: clampedRegion.minLongitude },
+        { latitude: clampedRegion.maxLatitude, longitude: clampedRegion.maxLongitude },
     ];
+}
+
+export function clampRegionLat(region: TerralertRegion): TerralertRegion {
+    const MAX_MERCATOR_LAT = 80;
+
+    return {
+        ...region,
+        minLatitude: Math.max(region.minLatitude, -MAX_MERCATOR_LAT),
+        maxLatitude: Math.min(region.maxLatitude, MAX_MERCATOR_LAT),
+    };
 }

@@ -24,24 +24,41 @@ import MenuBar, {MenuActions} from "@/components/menu-bar";
 import {useCategoryState} from "@/components/category-state-context";
 import {ThemedText} from "@/components/themed-text";
 import {Asset} from "expo-asset";
+import HistoryMenu from "@/components/history-menu";
 
 export default function Terralert() {
+    //-------------------
+    // Visual Setup
+    //-------
     const colorScheme = useColorScheme();
     const theme = colorScheme === "dark" ? CustomDarkTheme : CustomDefaultTheme;
     const { colors } = useTheme();
     const {height, width, scale, fontScale} = useWindowDimensions();
 
+    //-------------------
     // States
-    const {category, setCategory} = useCategoryState();
-    const [region, setRegion] = useState<TerralertRegion | null>(null);
-    const [categoryMenuVisibility, toggleCategoryMenuVisibility] = useState(false);
-    const [regionMenuVisibility, toggleRegionMenuVisibility] = useState(false);
-    const [eventData, setEventData] = useState<TerralertEvent[] | null>(null);
-    const [markers, setMarkers] = useState<TerralertMapMarker[]>([])
+    //-------
+    // General app states
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<unknown>(null);
 
     // Menus
+    const [categoryMenuVisibility, toggleCategoryMenuVisibility] = useState(false);
+    const [regionMenuVisibility, toggleRegionMenuVisibility] = useState(false);
+
+    // Category, Region, EventData & Markers
+    const {category, setCategory} = useCategoryState();
+    const [region, setRegion] = useState<TerralertRegion | null>(null);
+    const [eventData, setEventData] = useState<TerralertEvent[] | null>(null);
+    const [markers, setMarkers] = useState<TerralertMapMarker[]>([])
+
+    // History
+    const [locked, setLocked] = useState(false);
+
+    //-------------------
+    // Menus
+    //-------
+    // Menu Options & Actions
     const categoryOptions: OptionItem[] = [
         {
             iconSize: 40, iconColor: colors.text, iconPath: 'storm', iconLibrary: "MaterialIcons",  label: 'Storms', onPress: () => {
@@ -88,11 +105,15 @@ export default function Terralert() {
         openSettings: () => console.log("Settings opened"),
     };
 
+    //-------------------
     // Test Data
+    //-------
     const parsedEvent: TerralertEvent = parseTerralertEvent(testEvent);
     const marker = geometryToMarkers(parsedEvent.geometry);
 
-    // Map View
+    //-------------------
+    // Map View Control
+    //-------
     const mapRef = useRef<MapView>(null);
 
     Asset.loadAsync(Object.values(icons));
@@ -101,12 +122,15 @@ export default function Terralert() {
         setRegion(region);
     }
 
+    //-------------------
+    // Use Effects
+    //-------
     useEffect(() => {
         if (region !== null) {
             const coords = regionToBoundingBoxCoords(region);
 
             mapRef.current?.fitToCoordinates(coords, {
-                edgePadding: {top: 30, right: 30, bottom: 30, left: 30},
+                edgePadding: {top: 0, right: 30, bottom: 80, left: 30},
                 animated: true,
             });
         }
@@ -134,8 +158,22 @@ export default function Terralert() {
         }
     }, [eventData])
 
+    //-------------------
+    // Structure
+    //-------
     return(
         <ThemedView style={styles.mainContainer}>
+
+            <ThemedView style={[styles.statusBarContainer, {backgroundColor: colors.background}]}>
+                <ThemedView style={[styles.statusBar, {backgroundColor: colors.background, borderColor: colors.text}]}>
+                    <ThemedText style={[styles.statusBarText, {color: colors.notification}]}>
+                        {"CATEGORY: " + parseCategoryToFullName(category.category).toUpperCase()}
+                    </ThemedText>
+                    <ThemedText style={[styles.statusBarText, {color: colors.notification}]}>
+                        {"REGION: " + (region !== null ? region.description.toUpperCase() : "NONE")}
+                    </ThemedText>
+                </ThemedView>
+            </ThemedView>
 
             <ThemedView style={styles.mapContainer}>
                 <MapView
@@ -148,6 +186,10 @@ export default function Terralert() {
                         latitudeDelta: 65,
                         longitudeDelta: 117,
                     }}
+                    scrollEnabled={!locked}
+                    zoomEnabled={!locked}
+                    rotateEnabled={!locked}
+                    pitchEnabled={!locked}
                     onRegionChange={(region, details) => {
                         if(details.isGesture) {
                             onRegionChange(null)
@@ -168,13 +210,8 @@ export default function Terralert() {
                 <ThemedView style={[styles.optionsContainer, regionMenuVisibility ? styles.display_true : styles.display_false]}>
                     <OptionsStack options={regionOptions}/>
                 </ThemedView>
-                <ThemedView style={[styles.statusBar, {backgroundColor: colors.background, borderColor: colors.text}]}>
-                    <ThemedText style={[styles.statusBarText, {color: colors.notification}]}>
-                        {"CATEGORY: " + parseCategoryToFullName(category.category).toUpperCase()}
-                    </ThemedText>
-                    <ThemedText style={[styles.statusBarText, {color: colors.notification}]}>
-                        {"REGION: " + (region !== null ? region.description.toUpperCase() : "NONE")}
-                    </ThemedText>
+                <ThemedView style={[styles.optionsContainer]}>
+                    <HistoryMenu/>
                 </ThemedView>
                 <MenuBar actions={actions}/>
             </ThemedView>
@@ -198,6 +235,38 @@ const styles = StyleSheet.create({
         paddingBottom: 0
     },
 
+    statusBarContainer: {
+        width: "100%",
+        backgroundColor: "rgba(0,0,0,0.0)",
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        position: "absolute",
+        top: 0,
+        left: 0,
+        zIndex: 100,
+        height: 'auto',
+        flexDirection: "column",
+        paddingTop: '15%'
+    },
+
+    statusBar: {
+        width: "100%",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingVertical: 2,
+        paddingHorizontal: 5,
+        borderTopWidth: 0.2,
+        borderBottomWidth: 1,
+        height: 'auto'
+    },
+
+    statusBarText: {
+        fontWeight: "bold",
+        fontSize: 12,
+        marginHorizontal: 5,
+    },
+
     mapContainer: {
         flex: 1,
         position: "relative"
@@ -213,24 +282,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "rgba(0,0,0,0.0)",
-    },
-
-    statusBarText: {
-        fontWeight: "bold",
-        fontSize: 12,
-        marginHorizontal: 5,
-    },
-
-    statusBar: {
-        width: "100%",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingVertical: 2,
-        paddingHorizontal: 5,
-        borderTopWidth: 1,
-        borderBottomWidth: 0.2,
-        height: "auto"
     },
 
     menuBarContainer: {
