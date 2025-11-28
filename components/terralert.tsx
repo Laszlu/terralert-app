@@ -3,7 +3,7 @@ import 'react-native-reanimated';
 
 import {useColorScheme} from '@/hooks/use-color-scheme';
 import {ThemedView} from "@/components/themed-view";
-import {Image, StyleSheet, useWindowDimensions} from "react-native";
+import {Image, StyleSheet, TouchableOpacity, useWindowDimensions} from "react-native";
 import MapView, {Marker, PROVIDER_GOOGLE, } from "react-native-maps";
 import {OptionsStack, OptionItem} from "@/components/option-stack";
 import {useEffect, useRef, useState} from "react";
@@ -45,6 +45,7 @@ export default function Terralert() {
     // Menus
     const [categoryMenuVisibility, toggleCategoryMenuVisibility] = useState(false);
     const [regionMenuVisibility, toggleRegionMenuVisibility] = useState(false);
+    const [historyMenuVisibility, toggleHistoryMenuVisibility] = useState(false);
 
     // Category, Region, EventData & Markers
     const {category, setCategory} = useCategoryState();
@@ -53,7 +54,8 @@ export default function Terralert() {
     const [markers, setMarkers] = useState<TerralertMapMarker[]>([])
 
     // History
-    const [locked, setLocked] = useState(false);
+    const [comparisonActive, setComparisonActive] = useState(false);
+    const [historyTimeFrame, setHistoryTimeFrame] = useState<number[]>([]);
 
     //-------------------
     // Menus
@@ -91,16 +93,18 @@ export default function Terralert() {
     const actions: MenuActions = {
         changeCategory: () => {
             toggleRegionMenuVisibility(false);
+            toggleHistoryMenuVisibility(false);
             toggleCategoryMenuVisibility(v => !v);
         },
         changeRegion: () => {
             toggleCategoryMenuVisibility(false);
+            toggleHistoryMenuVisibility(false);
             toggleRegionMenuVisibility(v => !v);
         },
         openHistory: () => {
-            console.log("History opened");
             toggleCategoryMenuVisibility(false);
             toggleRegionMenuVisibility(false);
+            toggleHistoryMenuVisibility(v => !v);
         },
         openSettings: () => console.log("Settings opened"),
     };
@@ -173,6 +177,16 @@ export default function Terralert() {
                         {"REGION: " + (region !== null ? region.description.toUpperCase() : "NONE")}
                     </ThemedText>
                 </ThemedView>
+                {comparisonActive &&
+                    <ThemedView style={[styles.comparisonInfo, {backgroundColor: colors.background, borderColor: colors.text}]}>
+                        <TouchableOpacity onPress={() => {setComparisonActive(false)}}>
+                            <ThemedText style={[styles.statusBarText, {color: colors.notification, fontSize: 16}]}>
+                                TAP HERE TO END COMPARISON
+                            </ThemedText>
+                        </TouchableOpacity>
+                    </ThemedView>
+
+                }
             </ThemedView>
 
             <ThemedView style={styles.mapContainer}>
@@ -186,10 +200,10 @@ export default function Terralert() {
                         latitudeDelta: 65,
                         longitudeDelta: 117,
                     }}
-                    scrollEnabled={!locked}
-                    zoomEnabled={!locked}
-                    rotateEnabled={!locked}
-                    pitchEnabled={!locked}
+                    scrollEnabled={!comparisonActive}
+                    zoomEnabled={!comparisonActive}
+                    rotateEnabled={!comparisonActive}
+                    pitchEnabled={!comparisonActive}
                     onRegionChange={(region, details) => {
                         if(details.isGesture) {
                             onRegionChange(null)
@@ -210,8 +224,15 @@ export default function Terralert() {
                 <ThemedView style={[styles.optionsContainer, regionMenuVisibility ? styles.display_true : styles.display_false]}>
                     <OptionsStack options={regionOptions}/>
                 </ThemedView>
-                <ThemedView style={[styles.optionsContainer]}>
-                    <HistoryMenu/>
+                <ThemedView style={[styles.optionsContainer, historyMenuVisibility ? styles.display_true : styles.display_false]}>
+                    <HistoryMenu
+                        region={region}
+                        setRegion={setRegion}
+                        regions={category.regions}
+                        setComparisonActive={setComparisonActive}
+                        setHistoryTimeFrame={setHistoryTimeFrame}
+                        toggleHistoryMenuVisibility={toggleHistoryMenuVisibility}
+                    />
                 </ThemedView>
                 <MenuBar actions={actions}/>
             </ThemedView>
@@ -254,6 +275,18 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
+        paddingVertical: 2,
+        paddingHorizontal: 5,
+        borderTopWidth: 0.2,
+        borderBottomWidth: 1,
+        height: 'auto'
+    },
+
+    comparisonInfo: {
+        width: "100%",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
         paddingVertical: 2,
         paddingHorizontal: 5,
         borderTopWidth: 0.2,

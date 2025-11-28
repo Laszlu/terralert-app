@@ -5,13 +5,13 @@ import {useTheme} from "@react-navigation/native";
 
 export type DropdownItem = {
     label: string;
-    value: number;
+    value: number | string;
 }
 
 export type DropdownProps = {
     items: DropdownItem[];
     placeholder?: string;
-    value?: number;
+    value?: number | string;
     onChange: (item: DropdownItem) => void;
     disabled?: boolean;
 }

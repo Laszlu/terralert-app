@@ -3,10 +3,24 @@ import {useTheme} from "@react-navigation/native";
 import {ThemedText} from "@/components/themed-text";
 import Dropdown, {DropdownItem} from "@/components/dropdown";
 import {MIN_YEAR} from "@/constants/constants";
-import {useState} from "react";
+import React, {useState} from "react";
+import {TerralertRegion} from "@/helper/terralert-region-helper";
+import ThemedButton from "@/components/themed-button";
+import {useCategoryState} from "@/components/category-state-context";
+import {parseCategoryToFullName} from "@/helper/ui-helper";
 
-export function HistoryMenu() {
+export type HistoryMenuProps = {
+    regions: TerralertRegion[];
+    region: TerralertRegion | null;
+    setRegion: React.Dispatch<React.SetStateAction<TerralertRegion | null>>;
+    setComparisonActive: React.Dispatch<React.SetStateAction<boolean>>;
+    toggleHistoryMenuVisibility:  React.Dispatch<React.SetStateAction<boolean>>;
+    setHistoryTimeFrame: React.Dispatch<React.SetStateAction<number[]>>;
+}
+
+export function HistoryMenu(props: HistoryMenuProps) {
     const {colors} = useTheme()
+    const {category, setCategory} = useCategoryState();
 
     const today = new Date();
     const currentYear = today.getFullYear();
@@ -40,31 +54,86 @@ export function HistoryMenu() {
         );
     }
 
+    let selectableRegions: DropdownItem[] = [];
+    props.regions.forEach((region) => {
+        let regionItem: DropdownItem = {
+            label: region.description,
+            value: region.name
+        }
+        selectableRegions.push(regionItem);
+    })
+
+    const [historyRegion, setHistoryRegion] = useState<TerralertRegion | null>(null);
+
+    const handleRegionSelected = (regionItem: DropdownItem) => {
+        let convertedRegion = props.regions.find(region => region.name === regionItem.value);
+        if(convertedRegion !== undefined) {
+            setHistoryRegion(convertedRegion);
+        }
+    }
+
+    const [validComparison, setValidComparison] = useState(true);
+
+    const startComparison = () => {
+
+        const yearStartValue = yearStart.value as number;
+        const yearEndValue = yearEnd.value as number;
+
+        const comparisonYears = Array.from(
+            {length: yearEndValue - yearStartValue + 1},
+            (_, i) => yearStartValue + i
+        );
+
+        if (historyRegion !== null && yearStartValue !== 0 && yearEndValue !== 0) {
+            props.setHistoryTimeFrame(comparisonYears);
+            props.setRegion(historyRegion);
+            props.setComparisonActive(true);
+            props.toggleHistoryMenuVisibility(false);
+        }
+        else {
+            setValidComparison(false);
+        }
+    }
+
     return(
         <View style={[styles.historyMenuView, {backgroundColor: colors.background}]}>
-            <View style={[styles.historyMenuRow]}>
+            <View style={[styles.historyMenuHeader]}>
                 <ThemedText style={[styles.historyMenuText]}>
                     Historical Comparison
                 </ThemedText>
+                {!validComparison && <ThemedText style={[styles.historyMenuErrorText, {}]}>VALUES FOR COMPARISON ARE MISSING</ThemedText>}
             </View>
             <View style={[styles.historyMenuRow]}>
-                <ThemedText style={[styles.historyMenuText]}>Timeframe:</ThemedText>
+                <ThemedText style={[styles.historyMenuText, {width: '30%'}]}>CATEGORY:</ThemedText>
+                <ThemedText style={[styles.historyMenuText]}>{parseCategoryToFullName(category.category).toUpperCase()}</ThemedText>
+            </View>
+            <View style={[styles.historyMenuRow]}>
+                <ThemedText style={[styles.historyMenuText, {width: '30%'}]}>TIMEFRAME:</ThemedText>
                 <Dropdown
                     items={possibleStartYearItems}
                     onChange={(selectedYear) => {handleYearSelected(selectedYear, yearEnd)}}
                     value={yearStart.value}
-                    placeholder={'Start'}
+                    placeholder={'START'}
                 />
                 <ThemedText style={[styles.historyMenuText]}> - </ThemedText>
                 <Dropdown
                     items={possibleEndYearItems}
                     onChange={(selectedYear) => {handleYearSelected(yearStart, selectedYear)}}
                     value={yearEnd.value}
-                    placeholder={'End'}
+                    placeholder={'END'}
                 />
             </View>
-            <View>
-
+            <View style={[styles.historyMenuRow]}>
+                <ThemedText style={[styles.historyMenuText, {width: '30%'}]}>REGION:</ThemedText>
+                <Dropdown
+                    items={selectableRegions}
+                    onChange={(selectedRegion) => handleRegionSelected(selectedRegion)}
+                    value={historyRegion ? historyRegion.name : ""}
+                    placeholder={'REGION'}
+                />
+            </View>
+            <View style={[styles.historyMenuHeader]}>
+                <ThemedButton title={'START COMPARISON'} iconName={'history'} iconLibrary={"MaterialIcons"} onPress={() => {startComparison()}}/>
             </View>
         </View>
     )
@@ -87,12 +156,27 @@ const styles = StyleSheet.create({
         marginHorizontal: 5,
     },
 
+    historyMenuErrorText: {
+        fontWeight: "bold",
+        fontSize: 12,
+        marginHorizontal: 5,
+        color: 'red'
+    },
+
+    historyMenuHeader: {
+        alignItems: "center",
+        justifyContent: 'center',
+        width: '100%',
+        paddingVertical: 10
+    },
+
     historyMenuRow: {
         flexDirection: "row",
         alignItems: "center",
         width: '100%',
-        justifyContent: 'space-evenly',
-        paddingVertical: 5
+        justifyContent: 'flex-start',
+        paddingVertical: 10,
+        paddingHorizontal: 15,
     }
 })
 
