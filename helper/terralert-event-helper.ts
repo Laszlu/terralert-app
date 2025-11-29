@@ -1,7 +1,8 @@
 import {TerralertEvent, Category, Source, TerralertGeometry, TerralertCoordinates} from "@/model/event";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {ImageURISource} from "react-native";
-import {getImageForEventByCategory} from "@/helper/ui-helper";
+import {getIconPathForCategory, getImageForEventByCategory, IconInfo} from "@/helper/ui-helper";
+import {pinColors} from "@/constants/constants";
 
 type RawCoordinateObj = {
     PointCoordinates?: number[] | null;
@@ -17,7 +18,14 @@ export type TerralertMapMarker = {
     magnitudeValue?: number | null;
     date?: string | null;
     image?: number | ImageURISource | undefined;
+    color?: string;
+    icon?: IconInfo;
 };
+
+export type TerralertPolyLine = {
+    coordinates: { latitude: number; longitude: number }[];
+    color?: string;
+}
 
 export function parseTerralertEvent(jsonEvent: any): TerralertEvent {
     const categories: Category[] = (jsonEvent.categories || []).map(
@@ -101,7 +109,48 @@ export function getMarkerForEvent(event: TerralertEvent): TerralertMapMarker | n
                 date: currentGeometry.date ?? null,
                 title: `${event.title ?? "Event"}`,
                 description: ` ${currentGeometry.date ?? ""} ${currentGeometry.magnitudeValue != null ? "- " + currentGeometry.magnitudeValue : ""}${currentGeometry.magnitudeUnit ?? ""}`,
-                image: getImageForEventByCategory(event.categories[0])
+                icon: getIconPathForCategory(event.categories[0].id as string)
+            }
+
+            console.log(marker.icon);
+            return marker;
+        }
+    }
+
+    return null;
+}
+
+export function getMarkersForHistoryEvents(events: TerralertEvent[], colorIndex: number): TerralertMapMarker[] {
+    const markers: TerralertMapMarker[] = [];
+
+    events.forEach(event => {
+        let marker = getMarkerForHistoryEvent(event, colorIndex);
+        if (marker != null) {
+            markers.push(marker)
+        }
+    });
+
+    return markers;
+}
+
+export function getMarkerForHistoryEvent(event: TerralertEvent, colorIndex: number): TerralertMapMarker | null {
+    const geometryCount = event.geometry.length;
+    const currentGeometry = event.geometry[geometryCount - 1];
+    let marker: TerralertMapMarker;
+
+    for (const coord of currentGeometry.coordinates) {
+        if (coord.pointCoordinates && coord.pointCoordinates.length === 2) {
+            const [lon, lat] = coord.pointCoordinates;
+
+            marker = {
+                latitude: lat,
+                longitude: lon,
+                magnitudeValue: currentGeometry.magnitudeValue ?? null,
+                date: currentGeometry.date ?? null,
+                title: `${event.title ?? "Event"}`,
+                description: ` ${currentGeometry.date ?? ""} ${currentGeometry.magnitudeValue != null ? "- " + currentGeometry.magnitudeValue : ""}${currentGeometry.magnitudeUnit ?? ""}`,
+                color: pinColors[colorIndex],
+                icon: getIconPathForCategory(event.categories[0].id as string),
             }
 
             return marker;
@@ -109,6 +158,30 @@ export function getMarkerForEvent(event: TerralertEvent): TerralertMapMarker | n
     }
 
     return null;
+}
+
+export function getPolylineForHistoryEvent(
+    event: TerralertEvent,
+    colorIndex: number
+): TerralertPolyLine | null {
+
+    const coords: { latitude: number; longitude: number }[] = [];
+
+    for (const geom of event.geometry) {
+        for (const coord of geom.coordinates) {
+            if (coord.pointCoordinates && coord.pointCoordinates.length === 2) {
+                const [lon, lat] = coord.pointCoordinates;
+                coords.push({ latitude: lat, longitude: lon });
+            }
+        }
+    }
+
+    if (coords.length < 2) return null; // not enough points to draw a line
+
+    return {
+        coordinates: coords,
+        color: pinColors[colorIndex],
+    };
 }
 
 export function geometryToMarkers(geometry: TerralertGeometry[]): TerralertMapMarker[] {

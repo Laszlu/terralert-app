@@ -31,10 +31,13 @@ export function parseCategoryToFullName(category: string): string {
 export function getIconPathForCategory(category: string): IconInfo {
     switch (category) {
         case "st":
+        case "severeStorms":
             return {iconName: "storm", iconLibrary: "MaterialIcons"};
         case "ea":
+        case "earthquakes":
             return {iconName: "image-broken-variant", iconLibrary: "MaterialCommunityIcons"};
         case "vo":
+        case "volcanoes":
             return {iconName: "volcano", iconLibrary: "MaterialIcons"};
         default:
             return {iconName: "not-interested", iconLibrary: "MaterialIcons"};

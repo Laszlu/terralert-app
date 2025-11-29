@@ -4,7 +4,7 @@ import 'react-native-reanimated';
 import {useColorScheme} from '@/hooks/use-color-scheme';
 import {ThemedView} from "@/components/themed-view";
 import {Image, StyleSheet, TouchableOpacity, useWindowDimensions} from "react-native";
-import MapView, {Marker, PROVIDER_GOOGLE, } from "react-native-maps";
+import MapView, {Marker, Polyline, PROVIDER_GOOGLE,} from "react-native-maps";
 import {OptionsStack, OptionItem} from "@/components/option-stack";
 import {useEffect, useRef, useState} from "react";
 
@@ -12,12 +12,12 @@ import testEvent from '../model/TestEvent.json'
 import {TerralertEvent} from "@/model/event";
 import {
     geometryToMarkers,
-    getMarkersForEvents,
+    getMarkersForEvents, getMarkersForHistoryEvents, getPolylineForHistoryEvent,
     parseTerralertEvent,
-    TerralertMapMarker
+    TerralertMapMarker, TerralertPolyLine
 } from "@/helper/terralert-event-helper";
 import {icons, parseCategoryToFullName} from "@/helper/ui-helper";
-import {getCurrentEvents} from "@/api/terralert-client";
+import {getCurrentEvents, getEventsByCategoryRegionAndYear} from "@/api/terralert-client";
 import {regionToBoundingBoxCoords, TerralertRegion} from "@/helper/terralert-region-helper";
 import {CustomDarkTheme, CustomDefaultTheme} from "@/constants/CustomTheme";
 import MenuBar, {MenuActions} from "@/components/menu-bar";
@@ -25,6 +25,9 @@ import {useCategoryState} from "@/components/category-state-context";
 import {ThemedText} from "@/components/themed-text";
 import {Asset} from "expo-asset";
 import HistoryMenu from "@/components/history-menu";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import IconComponent from "@/components/icon-component";
+import HistoryLegend from "@/components/history-legend";
 
 export default function Terralert() {
     //-------------------
@@ -56,6 +59,9 @@ export default function Terralert() {
     // History
     const [comparisonActive, setComparisonActive] = useState(false);
     const [historyTimeFrame, setHistoryTimeFrame] = useState<number[]>([]);
+    const [historyEventArrays, setHistoryEventArrays] = useState<TerralertEvent[][] | null>(null);
+    const [historyMarkers, setHistoryMarkers] = useState<TerralertMapMarker[]>([]);
+    const [historyPolylines, setHistoryPolylines] = useState<TerralertPolyLine[]>([]);
 
     //-------------------
     // Menus
@@ -157,10 +163,55 @@ export default function Terralert() {
     }, [category])
 
     useEffect( () => {
-        if (eventData != null) {
+        if (eventData != null && !comparisonActive) {
             setMarkers(getMarkersForEvents(eventData))
         }
-    }, [eventData])
+    }, [eventData, comparisonActive])
+
+    useEffect(() => {
+        async function load() {
+            try {
+                let eventArrays: TerralertEvent[][] = []
+                for (const year of historyTimeFrame) {
+                    const eventsForYear = await getEventsByCategoryRegionAndYear(category, region!, year);
+                    eventArrays.push(eventsForYear);
+                }
+                setHistoryEventArrays(eventArrays);
+            } catch (error) {
+                setError(error);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        if(comparisonActive) {
+            console.log("loading Comparison data");
+            load();
+        }
+
+    }, [historyTimeFrame, comparisonActive, category, region]);
+
+    useEffect(() => {
+        if(historyEventArrays != null && comparisonActive) {
+            let historyMarkers: TerralertMapMarker[] = [];
+            let historyPolylines: TerralertPolyLine[] = [];
+            historyEventArrays.forEach((eventArray, index) => {
+                let markers = getMarkersForHistoryEvents(eventArray, index);
+                historyMarkers.push(...markers);
+
+                eventArray.forEach(event => {
+                    const poly = getPolylineForHistoryEvent(event, index);
+                    if (poly) {
+                        historyPolylines.push(poly);
+                    }
+                });
+            });
+            setHistoryMarkers(historyMarkers);
+            setHistoryPolylines(historyPolylines);
+        }
+    }, [historyEventArrays, comparisonActive]);
+
+    const activeMarkers = comparisonActive ? historyMarkers : markers;
 
     //-------------------
     // Structure
@@ -179,7 +230,7 @@ export default function Terralert() {
                 </ThemedView>
                 {comparisonActive &&
                     <ThemedView style={[styles.comparisonInfo, {backgroundColor: colors.background, borderColor: colors.text}]}>
-                        <TouchableOpacity onPress={() => {setComparisonActive(false)}}>
+                        <TouchableOpacity onPress={() => {setComparisonActive(false); onRegionChange(null);}}>
                             <ThemedText style={[styles.statusBarText, {color: colors.notification, fontSize: 16}]}>
                                 TAP HERE TO END COMPARISON
                             </ThemedText>
@@ -200,24 +251,42 @@ export default function Terralert() {
                         latitudeDelta: 65,
                         longitudeDelta: 117,
                     }}
-                    scrollEnabled={!comparisonActive}
-                    zoomEnabled={!comparisonActive}
-                    rotateEnabled={!comparisonActive}
-                    pitchEnabled={!comparisonActive}
+
                     onRegionChange={(region, details) => {
-                        if(details.isGesture) {
+                        if(details.isGesture && !comparisonActive) {
                             onRegionChange(null)
                         }
                     }}>
-                    {markers.map((m, index) => (
-                        <Marker key={index} coordinate={{ latitude: m.latitude, longitude: m.longitude }} title={m.title} description={m.description}>
-                            <Image source={m.image} style={{width: 30, height: 30, resizeMode:"contain"}}/>
+                    {activeMarkers.map((m, index) => (
+                        <Marker
+                            pinColor={comparisonActive ? m.color : undefined}
+                            key={index}
+                            coordinate={{ latitude: m.latitude, longitude: m.longitude }}
+                            title={m.title}
+                            description={m.description}>
+                            {!comparisonActive && m.icon && (
+                                <IconComponent library={m.icon.iconLibrary} name={m.icon.iconName} size={30} color={m.color}/>
+                            )}
+                            {comparisonActive && m.icon && (
+                                <IconComponent library={m.icon.iconLibrary} name={m.icon.iconName} size={30} color={m.color}/>
+                            )}
                         </Marker>
+                    ))}
+                    {comparisonActive && historyPolylines.map((poly, index) => (
+                        <Polyline
+                            key={`poly-${index}`}
+                            coordinates={poly.coordinates}
+                            strokeColor={poly.color}
+                            strokeWidth={5}
+                        />
                     ))}
                 </MapView>
             </ThemedView>
 
             <ThemedView style={styles.menuBarContainer}>
+                <ThemedView style={[styles.optionsContainer, comparisonActive ? styles.display_true : styles.display_false]}>
+                    <HistoryLegend years={historyTimeFrame}/>
+                </ThemedView>
                 <ThemedView style={[styles.optionsContainer, categoryMenuVisibility ? styles.display_true : styles.display_false]}>
                     <OptionsStack options={categoryOptions}/>
                 </ThemedView>
