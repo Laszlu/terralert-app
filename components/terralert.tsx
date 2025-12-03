@@ -12,7 +12,7 @@ import testEvent from '../model/TestEvent.json'
 import {TerralertEvent} from "@/model/event";
 import {
     geometryToMarkers,
-    getMarkersForEvents, getMarkersForHistoryEvents, getPolylineForHistoryEvent,
+    getMarkersForEvents, getMarkersForHistoryEvents, getPolylineForEventWithColor,
     parseTerralertEvent,
     TerralertMapMarker, TerralertPolyLine
 } from "@/helper/terralert-event-helper";
@@ -54,7 +54,8 @@ export default function Terralert() {
     const {category, setCategory} = useCategoryState();
     const [region, setRegion] = useState<TerralertRegion | null>(null);
     const [eventData, setEventData] = useState<TerralertEvent[] | null>(null);
-    const [markers, setMarkers] = useState<TerralertMapMarker[]>([])
+    const [markers, setMarkers] = useState<TerralertMapMarker[]>([]);
+    const [currentEventLines, setCurrentEventLines] = useState<TerralertPolyLine[]>([]);
 
     // History
     const [comparisonActive, setComparisonActive] = useState(false);
@@ -165,6 +166,14 @@ export default function Terralert() {
     useEffect( () => {
         if (eventData != null && !comparisonActive) {
             setMarkers(getMarkersForEvents(eventData))
+            let eventPolyLines: TerralertPolyLine[] = [];
+            eventData.forEach(event => {
+                const poly = getPolylineForEventWithColor(event, 6);
+                if(poly) {
+                    eventPolyLines.push(poly);
+                }
+            })
+            setCurrentEventLines(eventPolyLines);
         }
     }, [eventData, comparisonActive])
 
@@ -200,7 +209,7 @@ export default function Terralert() {
                 historyMarkers.push(...markers);
 
                 eventArray.forEach(event => {
-                    const poly = getPolylineForHistoryEvent(event, index);
+                    const poly = getPolylineForEventWithColor(event, index);
                     if (poly) {
                         historyPolylines.push(poly);
                     }
@@ -263,7 +272,8 @@ export default function Terralert() {
                             key={index}
                             coordinate={{ latitude: m.latitude, longitude: m.longitude }}
                             title={m.title}
-                            description={m.description}>
+                            description={m.description}
+                        >
                             {!comparisonActive && m.icon && (
                                 <IconComponent library={m.icon.iconLibrary} name={m.icon.iconName} size={30} color={m.color}/>
                             )}
@@ -271,6 +281,14 @@ export default function Terralert() {
                                 <IconComponent library={m.icon.iconLibrary} name={m.icon.iconName} size={30} color={m.color}/>
                             )}
                         </Marker>
+                    ))}
+                    {!comparisonActive && category.category == "st" && currentEventLines.map((poly, index) => (
+                        <Polyline
+                            key={`poly-${index}`}
+                            coordinates={poly.coordinates}
+                            strokeColor={poly.color}
+                            strokeWidth={5}
+                        />
                     ))}
                     {comparisonActive && historyPolylines.map((poly, index) => (
                         <Polyline
@@ -284,7 +302,7 @@ export default function Terralert() {
             </ThemedView>
 
             <ThemedView style={styles.menuBarContainer}>
-                <ThemedView style={[styles.optionsContainer, comparisonActive ? styles.display_true : styles.display_false]}>
+                <ThemedView style={[styles.legendContainer, comparisonActive ? styles.display_true : styles.display_false, {justifyContent: 'flex-start', backgroundColor: colors.background}]}>
                     <HistoryLegend years={historyTimeFrame}/>
                 </ThemedView>
                 <ThemedView style={[styles.optionsContainer, categoryMenuVisibility ? styles.display_true : styles.display_false]}>
@@ -378,6 +396,15 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
     },
 
+    legendContainer: {
+        width: "100%",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        borderColor: "rgba(0,0,0,0.2)",
+        borderWidth: 1,
+    },
+
     optionsContainer: {
         width: "100%",
         flexDirection: "row",
@@ -394,6 +421,6 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         zIndex: 100,
-        height: 'auto'
+        height: 'auto',
     },
 });

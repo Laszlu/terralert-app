@@ -160,7 +160,7 @@ export function getMarkerForHistoryEvent(event: TerralertEvent, colorIndex: numb
     return null;
 }
 
-export function getPolylineForHistoryEvent(
+export function getPolylineForEventWithColor(
     event: TerralertEvent,
     colorIndex: number
 ): TerralertPolyLine | null {
