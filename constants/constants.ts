@@ -1,5 +1,7 @@
 export const MIN_YEAR = 2015;
 
+export const MAX_COORD_JUMP = 10;
+
 export const pinColors = [
     "#FF0000", // Red
     "#FF7F00", // Orange

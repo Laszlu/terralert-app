@@ -2,7 +2,8 @@ import {TerralertEvent, Category, Source, TerralertGeometry, TerralertCoordinate
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {ImageURISource} from "react-native";
 import {getIconPathForCategory, getImageForEventByCategory, IconInfo} from "@/helper/ui-helper";
-import {pinColors} from "@/constants/constants";
+import {MAX_COORD_JUMP, pinColors} from "@/constants/constants";
+import {json} from "node:stream/consumers";
 
 type RawCoordinateObj = {
     PointCoordinates?: number[] | null;
@@ -25,6 +26,64 @@ export type TerralertMapMarker = {
 export type TerralertPolyLine = {
     coordinates: { latitude: number; longitude: number }[];
     color?: string;
+}
+
+function filterOutlierCoordinates(geometry: TerralertGeometry[]): TerralertGeometry[] {
+    if (geometry.length <= 2) return geometry; // not enough points to detect outliers
+
+    const result: TerralertGeometry[] = [];
+
+    for (let i = 0; i < geometry.length; i++) {
+        const curr = geometry[i];
+        const currPt = curr.coordinates[0]?.pointCoordinates;
+
+        // Keep if malformed or polygon
+        if (!currPt || currPt.length !== 2) {
+            result.push(curr);
+            continue;
+        }
+
+        const [lon, lat] = currPt;
+
+        // First or last geometry → always keep (cannot check both sides)
+        if (i === 0 || i === geometry.length - 1) {
+            result.push(curr);
+            continue;
+        }
+
+        // Get previous and next points
+        const prevPt = geometry[i - 1].coordinates[0]?.pointCoordinates;
+        const nextPt = geometry[i + 1].coordinates[0]?.pointCoordinates;
+
+        // If prev or next is missing → keep
+        if (!prevPt || !nextPt || prevPt.length !== 2 || nextPt.length !== 2) {
+            result.push(curr);
+            continue;
+        }
+
+        const prevLonDiff = Math.abs(lon - prevPt[0]);
+        const prevLatDiff = Math.abs(lat - prevPt[1]);
+
+        const nextLonDiff = Math.abs(lon - nextPt[0]);
+        const nextLatDiff = Math.abs(lat - nextPt[1]);
+
+        const exceedsPrev = prevLonDiff > MAX_COORD_JUMP || prevLatDiff > MAX_COORD_JUMP;
+        const exceedsNext = nextLonDiff > MAX_COORD_JUMP || nextLatDiff > MAX_COORD_JUMP;
+
+        // Real outlier only if **both** sides say it's bad
+        if (exceedsPrev && exceedsNext) {
+            console.log(
+                `Removed outlier at index ${i}: lon=${lon}, lat=${lat} ` +
+                `(prevDiff: ${prevLonDiff},${prevLatDiff} nextDiff: ${nextLonDiff},${nextLatDiff})`
+            );
+            continue;
+        }
+
+        // Else accept it
+        result.push(curr);
+    }
+
+    return result;
 }
 
 export function parseTerralertEvent(jsonEvent: any): TerralertEvent {
@@ -63,6 +122,7 @@ export function parseTerralertEvent(jsonEvent: any): TerralertEvent {
             coordsInstances
         );
     });
+    const cleanedGeometry = filterOutlierCoordinates(geometry)
 
     return new TerralertEvent(
         jsonEvent.id ?? null,
@@ -72,7 +132,7 @@ export function parseTerralertEvent(jsonEvent: any): TerralertEvent {
         jsonEvent.closed ?? null,
         categories,
         sources,
-        geometry
+        cleanedGeometry
     );
 }
 
@@ -160,8 +220,6 @@ export function getMarkerForHistoryEvent(event: TerralertEvent, colorIndex: numb
     return null;
 }
 
-
-// TODO: SOME EVENTS HAVE ERRORS IN THEIR TAIL!!!!!!!!!
 export function getPolylineForEventWithColor(
     event: TerralertEvent,
     colorIndex: number
@@ -177,8 +235,6 @@ export function getPolylineForEventWithColor(
             }
         }
     }
-
-    if (coords.length < 2) return null; // not enough points to draw a line
 
     return {
         coordinates: coords,
