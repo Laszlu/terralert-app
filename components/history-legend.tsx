@@ -3,13 +3,14 @@ import {StyleSheet, View} from "react-native";
 import IconComponent from "@/components/icon-component";
 import {pinColors} from "@/constants/constants";
 import {ThemedText} from "@/components/themed-text";
+import {useMyTheme} from "@/hooks/useCustomTheme";
 
 export type HistoryLegendProps = {
     years: number[];
 }
 
 export function HistoryLegend(props: HistoryLegendProps) {
-    const {colors} = useTheme();
+    const {colors} = useMyTheme();
 
     return(
         <>

@@ -172,7 +172,6 @@ export function getMarkerForEvent(event: TerralertEvent): TerralertMapMarker | n
                 icon: getIconPathForCategory(event.categories[0].id as string)
             }
 
-            console.log(marker.icon);
             return marker;
         }
     }

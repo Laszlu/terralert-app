@@ -2,6 +2,7 @@ import {useState} from "react";
 import {FlatList, Modal, TouchableOpacity, View, StyleSheet} from "react-native";
 import {ThemedText} from "@/components/themed-text";
 import {useTheme} from "@react-navigation/native";
+import {useMyTheme} from "@/hooks/useCustomTheme";
 
 export type DropdownItem = {
     label: string;
@@ -17,7 +18,7 @@ export type DropdownProps = {
 }
 
 export function Dropdown(props: DropdownProps) {
-    const {colors} = useTheme()
+    const {colors} = useMyTheme()
     const [visible, setVisible] = useState(false);
 
     const selectedItem = props.items.find(item => item.value === props.value);
@@ -31,7 +32,7 @@ export function Dropdown(props: DropdownProps) {
         <>
             <TouchableOpacity
                 style={[
-                    styles.button,{ backgroundColor: colors.card, borderColor: colors.text }, props.disabled && {opacity: 0.5}
+                    styles.button,{ backgroundColor: colors.background, borderColor: colors.border }, props.disabled && {opacity: 0.5}
                 ]}
                 onPress={() => !props.disabled && setVisible(true)}>
                 <ThemedText style={styles.buttonText}>
@@ -49,13 +50,13 @@ export function Dropdown(props: DropdownProps) {
                     activeOpacity={1}
                     onPress={() => setVisible(false)}
                 >
-                    <View style={[styles.dropdown, {backgroundColor: colors.card}]}>
+                    <View style={[styles.dropdown, {backgroundColor: colors.background, borderColor: colors.border}]}>
                         <FlatList
                             data={props.items}
                             keyExtractor={(item) => item.value.toString()}
                             renderItem={({item}) => (
-                                <TouchableOpacity onPress={() => handleSelect(item)}>
-                                    <ThemedText style={styles.itemText}>{item.label}</ThemedText>
+                                <TouchableOpacity style={[styles.item, {borderColor: colors.border}]} onPress={() => handleSelect(item)}>
+                                    <ThemedText style={[styles.itemText, {color: colors.text}]}>{item.label}</ThemedText>
                                 </TouchableOpacity>
                             )}
                         />
@@ -73,25 +74,32 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
     buttonText: {
-        fontSize: 16
+        fontSize: 16,
+        fontWeight: "bold",
     },
     overlay: {
         flex: 1,
         backgroundColor: "rgba(0,0,0,0.3)",
         justifyContent: "center",
-        paddingHorizontal: 20
+        paddingHorizontal: 20,
+        alignItems: "center"
     },
     dropdown: {
         paddingVertical: 8,
+        paddingHorizontal: 20,
         borderRadius: 8,
-        maxHeight: 250
+        height: "auto",
+        width: '70%',
+        borderWidth: 0.5,
     },
     item: {
-        paddingVertical: 12,
-        paddingHorizontal: 16
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        marginBottom: 5,
     },
     itemText: {
-        fontSize: 16
+        fontSize: 16,
+        fontWeight: "bold",
     }
 });
 

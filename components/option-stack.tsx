@@ -7,6 +7,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import {IconLibraries, IconName} from "@/helper/ui-helper";
 import IconComponent from "@/components/icon-component";
+import {ThemedText} from "@/components/themed-text";
 
 // Define the type for one menu option
 export type OptionItem = {
@@ -28,7 +29,7 @@ export function OptionsStack(optionsStackProps: OptionsStackProps) {
 
 
     return(
-        <View style={[styles.optionsView, {backgroundColor: colors.background}]}>
+        <View style={[styles.optionsView, {backgroundColor: colors.background, borderColor: colors.border}]}>
             {optionsStackProps.options.map((item, index) => (
                 <TouchableOpacity
                     key={index}
@@ -36,7 +37,7 @@ export function OptionsStack(optionsStackProps: OptionsStackProps) {
                     style={{width: "100%", alignItems: "center", justifyContent: "flex-start", flexDirection: 'row'}}
                 >
                     <IconComponent library={item.iconLibrary} name={item.iconPath} size={item.iconSize} color={item.iconColor}/>
-                    <Text style={{marginLeft: 10}}>{item.label}</Text>
+                    <ThemedText style={{marginLeft: 10, fontWeight: "bold"}}>{item.label}</ThemedText>
                 </TouchableOpacity>
             ))}
         </View>
@@ -46,13 +47,12 @@ export function OptionsStack(optionsStackProps: OptionsStackProps) {
 const styles = StyleSheet.create({
     optionsView: {
         flexDirection: "column",
-        justifyContent: "space-between",
+        justifyContent: "center",
         alignItems: "center",
         width: '100%',
-        marginTop: 70,
         paddingVertical: 10,
-        borderColor: "rgba(0,0,0,0.2)",
-        borderWidth: 1,
+        borderTopWidth: 1,
+        borderBottomWidth: 0.5,
         paddingHorizontal: "30%",
     }
 })

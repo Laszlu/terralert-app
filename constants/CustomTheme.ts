@@ -8,6 +8,7 @@ export const CustomDefaultTheme = {
         notification: 'rgba(65,43,37,0.8)',
         background: 'rgb(244,239,228)',
         card: 'rgb(241,239,236)',
+        disabled: 'rgba(60,58,57,0.8)',
     },
 };
 
@@ -15,9 +16,10 @@ export const CustomDarkTheme = {
     ...DarkTheme,
     colors: {
         ...DarkTheme.colors,
-        tex: 'rgb(244,239,228)',
+        text: 'rgb(244,239,228)',
         notification: 'rgba(244,239,228, 0.8)',
         background: '#412B25',
         card: '#2e201a',
+        disabled: 'rgba(60,58,57,0.8)',
     },
 };

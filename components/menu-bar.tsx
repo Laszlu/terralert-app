@@ -4,6 +4,7 @@ import {useTheme} from "@react-navigation/native";
 import {StyleSheet} from "react-native";
 import {useCategoryState} from "@/components/category-state-context";
 import {getIconPathForCategory} from "@/helper/ui-helper";
+import {useMyTheme} from "@/hooks/useCustomTheme";
 
 export type MenuActions = {
     changeCategory: () => void;
@@ -14,20 +15,25 @@ export type MenuActions = {
 
 type MenuBarProps = {
     actions: MenuActions;
+    disabled: boolean;
+    categoryOpened: boolean;
+    regionOpened: boolean;
+    historyOpened: boolean;
+    settingsOpened: boolean;
 }
 
-export function MenuBar({actions}: MenuBarProps) {
-    const {colors} = useTheme()
+export function MenuBar({actions, disabled, categoryOpened, regionOpened, historyOpened, settingsOpened}: MenuBarProps) {
+    const {colors} = useMyTheme()
     const {category, setCategory} = useCategoryState();
 
     const categoryIcon = getIconPathForCategory(category.category);
 
     return (
-        <ThemedView style={[styles.menuBar, {backgroundColor: colors.background}]}>
-            <ThemedButton title={"CATEGORY"} iconName={categoryIcon.iconName} iconLibrary={categoryIcon.iconLibrary} onPress={actions.changeCategory}></ThemedButton>
-            <ThemedButton title={"REGION"} iconName={"earth"} iconLibrary={"MaterialCommunityIcons"} onPress={actions.changeRegion}></ThemedButton>
-            <ThemedButton title={"HISTORY"} iconName={"history"} iconLibrary={"MaterialIcons"} onPress={actions.openHistory}></ThemedButton>
-            <ThemedButton title={"SETTINGS"} iconName={"settings"} iconLibrary={"MaterialIcons"} onPress={actions.openSettings}></ThemedButton>
+        <ThemedView style={[styles.menuBar, {backgroundColor: colors.background, borderColor: colors.border}]}>
+            <ThemedButton title={"CATEGORY"} iconName={categoryIcon.iconName} iconLibrary={categoryIcon.iconLibrary} onPress={actions.changeCategory} disabled={disabled} selected={categoryOpened}></ThemedButton>
+            <ThemedButton title={"REGION"} iconName={"earth"} iconLibrary={"MaterialCommunityIcons"} onPress={actions.changeRegion} disabled={disabled} selected={regionOpened}></ThemedButton>
+            <ThemedButton title={"HISTORY"} iconName={"history"} iconLibrary={"MaterialIcons"} onPress={actions.openHistory}  disabled={category.category === "vo"} selected={historyOpened}></ThemedButton>
+            <ThemedButton title={"SETTINGS"} iconName={"settings"} iconLibrary={"MaterialIcons"} onPress={actions.openSettings} selected={settingsOpened}></ThemedButton>
         </ThemedView>
     )
 }
@@ -41,8 +47,6 @@ const styles = StyleSheet.create({
             paddingTop: 10,
             paddingBottom: 20,
             paddingHorizontal: 25,
-            borderTopWidth: 1,
-            borderColor: "rgba(0,0,0,0.2)",
         },
     }
 )

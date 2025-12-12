@@ -8,6 +8,7 @@ import {TerralertRegion} from "@/helper/terralert-region-helper";
 import ThemedButton from "@/components/themed-button";
 import {useCategoryState} from "@/components/category-state-context";
 import {parseCategoryToFullName} from "@/helper/ui-helper";
+import {useMyTheme} from "@/hooks/useCustomTheme";
 
 export type HistoryMenuProps = {
     regions: TerralertRegion[];
@@ -19,7 +20,7 @@ export type HistoryMenuProps = {
 }
 
 export function HistoryMenu(props: HistoryMenuProps) {
-    const {colors} = useTheme()
+    const {colors} = useMyTheme()
     const {category, setCategory} = useCategoryState();
 
     const today = new Date();
@@ -96,7 +97,7 @@ export function HistoryMenu(props: HistoryMenuProps) {
     }
 
     return(
-        <View style={[styles.historyMenuView, {backgroundColor: colors.background}]}>
+        <View style={[styles.historyMenuView, {backgroundColor: colors.background, borderColor: colors.border}]}>
             <View style={[styles.historyMenuHeader]}>
                 <ThemedText style={[styles.historyMenuText]}>
                     Historical Comparison
@@ -133,7 +134,7 @@ export function HistoryMenu(props: HistoryMenuProps) {
                 />
             </View>
             <View style={[styles.historyMenuHeader]}>
-                <ThemedButton title={'START COMPARISON'} iconName={'history'} iconLibrary={"MaterialIcons"} onPress={() => {startComparison()}}/>
+                <ThemedButton title={'START COMPARISON'} iconName={'history'} iconLibrary={"MaterialIcons"} onPress={() => {startComparison()}} disabled={false} selected={false}/>
             </View>
         </View>
     )
@@ -145,8 +146,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         width: '100%',
-        borderColor: "rgba(0,0,0,0.2)",
-        borderWidth: 1,
+        borderTopWidth: 1,
+        borderBottomWidth: 0.5,
         paddingVertical: 10,
     },
 
