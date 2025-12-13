@@ -1,6 +1,5 @@
 import {ThemedView} from "@/components/themed-view";
-import ThemedButton from "@/components/themed-button";
-import {Button, StyleSheet, Switch, View} from "react-native";
+import {StyleSheet, Switch, View} from "react-native";
 import {useThemeMode} from "@/components/ThemeProvider";
 import {ThemedText} from "@/components/themed-text";
 import React from "react";
@@ -77,4 +76,3 @@ const styles = StyleSheet.create({
 
 })
 
-export default SettingsMenu;

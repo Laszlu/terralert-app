@@ -30,4 +30,3 @@ export function IconComponent({library, name, size, color}: IconComponentProps) 
     }
 }
 
-export default IconComponent;

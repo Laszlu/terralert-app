@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useMemo } from 'react';
-import {NavigationContainer, ThemeProvider} from '@react-navigation/native';
-import useThemeColors, {useMyTheme, Colors} from '@/hooks/useCustomTheme';
+import {ThemeProvider} from '@react-navigation/native';
+import useThemeColors, {Colors} from '@/hooks/useCustomTheme';
 
 
 type ThemeMode = 'system' | 'light' | 'dark' | 'highContrast';

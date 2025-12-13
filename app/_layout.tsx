@@ -1,4 +1,3 @@
-import {ThemeProvider} from '@react-navigation/native';
 import 'react-native-reanimated';
 
 import Terralert from "@/components/terralert";

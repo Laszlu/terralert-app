@@ -1,7 +1,6 @@
 import {useState} from "react";
 import {FlatList, Modal, TouchableOpacity, View, StyleSheet} from "react-native";
 import {ThemedText} from "@/components/themed-text";
-import {useTheme} from "@react-navigation/native";
 import {useMyTheme} from "@/hooks/useCustomTheme";
 import {useResponsiveScaling} from "@/hooks/use-responsive-scaling";
 
@@ -135,4 +134,3 @@ const styles = StyleSheet.create({
     }
 });
 
-export default Dropdown;

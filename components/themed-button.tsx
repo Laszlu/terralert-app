@@ -1,11 +1,8 @@
 import React from 'react';
 import {Pressable, StyleSheet} from 'react-native';
 import {ThemedText} from './themed-text';
-import {useTheme} from '@react-navigation/native';
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import {IconLibraries, IconName} from "@/helper/ui-helper";
-import IconComponent from "@/components/icon-component";
+import {IconComponent} from "@/components/icon-component";
 import {useMyTheme} from "@/hooks/useCustomTheme";
 import {useResponsiveScaling} from "@/hooks/use-responsive-scaling";
 
@@ -53,4 +50,3 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ThemedButton;

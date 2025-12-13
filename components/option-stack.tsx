@@ -1,7 +1,7 @@
 import {TouchableOpacity, View, StyleSheet} from "react-native";
 import React from "react";
 import {IconLibraries, IconName} from "@/helper/ui-helper";
-import IconComponent from "@/components/icon-component";
+import {IconComponent} from "@/components/icon-component";
 import {ThemedText} from "@/components/themed-text";
 import {useMyTheme} from "@/hooks/useCustomTheme";
 import {useResponsiveScaling} from "@/hooks/use-responsive-scaling";

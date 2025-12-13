@@ -1,6 +1,5 @@
 import {ThemedView} from "@/components/themed-view";
-import ThemedButton from "@/components/themed-button";
-import {useTheme} from "@react-navigation/native";
+import {ThemedButton} from "@/components/themed-button";
 import {StyleSheet} from "react-native";
 import {useCategoryState} from "@/components/category-state-context";
 import {getIconPathForCategory} from "@/helper/ui-helper";
@@ -26,7 +25,7 @@ type MenuBarProps = {
 export function MenuBar({actions, disabled, categoryOpened, regionOpened, historyOpened, settingsOpened}: MenuBarProps) {
     const {colors} = useMyTheme()
     const responsiveScaling = useResponsiveScaling();
-    const {category, setCategory} = useCategoryState();
+    const {category} = useCategoryState();
 
     const categoryIcon = getIconPathForCategory(category.category);
 
@@ -59,4 +58,3 @@ const styles = StyleSheet.create({
     }
 )
 
-export default MenuBar;

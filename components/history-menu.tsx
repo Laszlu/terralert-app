@@ -1,11 +1,10 @@
 import {StyleSheet, View} from "react-native";
-import {useTheme} from "@react-navigation/native";
 import {ThemedText} from "@/components/themed-text";
-import Dropdown, {DropdownItem} from "@/components/dropdown";
+import {Dropdown, DropdownItem} from "@/components/dropdown";
 import {MIN_YEAR} from "@/constants/constants";
 import React, {useState} from "react";
 import {TerralertRegion} from "@/helper/terralert-region-helper";
-import ThemedButton from "@/components/themed-button";
+import {ThemedButton} from "@/components/themed-button";
 import {useCategoryState} from "@/components/category-state-context";
 import {parseCategoryToFullName} from "@/helper/ui-helper";
 import {useMyTheme} from "@/hooks/useCustomTheme";
@@ -23,7 +22,7 @@ export type HistoryMenuProps = {
 export function HistoryMenu(props: HistoryMenuProps) {
     const {colors} = useMyTheme();
     const responsiveScaling = useResponsiveScaling();
-    const {category, setCategory} = useCategoryState();
+    const {category} = useCategoryState();
 
     const today = new Date();
     const currentYear = today.getFullYear();
@@ -263,4 +262,3 @@ const styles = StyleSheet.create({
     }
 })
 
-export default HistoryMenu;

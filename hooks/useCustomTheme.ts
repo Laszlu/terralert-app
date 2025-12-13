@@ -1,5 +1,4 @@
-import {useColorScheme} from 'react-native';
-import {ColorSchemeName} from 'react-native';
+import {useColorScheme, ColorSchemeName} from 'react-native';
 import {DefaultTheme, Theme, useTheme} from '@react-navigation/native';
 
 export interface IColors {

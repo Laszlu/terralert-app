@@ -1,9 +1,6 @@
-import {useTheme} from '@react-navigation/native';
 import 'react-native-reanimated';
-
-import {useColorScheme} from '@/hooks/use-color-scheme';
 import {ThemedView} from "@/components/themed-view";
-import {Image, StyleSheet, TouchableOpacity, useWindowDimensions} from "react-native";
+import {StyleSheet, TouchableOpacity} from "react-native";
 import MapView, {Marker, Polyline, PROVIDER_GOOGLE,} from "react-native-maps";
 import {OptionsStack, OptionItem} from "@/components/option-stack";
 import {useEffect, useRef, useState} from "react";
@@ -19,18 +16,17 @@ import {
 import {icons, parseCategoryToFullName} from "@/helper/ui-helper";
 import {getCurrentEvents, getEventsByCategoryRegionAndYear} from "@/api/terralert-client";
 import {regionToBoundingBoxCoords, TerralertRegion} from "@/helper/terralert-region-helper";
-import {CustomDarkTheme, CustomDefaultTheme} from "@/constants/CustomTheme";
-import MenuBar, {MenuActions} from "@/components/menu-bar";
+import {MenuActions, MenuBar} from "@/components/menu-bar";
 import {useCategoryState} from "@/components/category-state-context";
 import {ThemedText} from "@/components/themed-text";
 import {Asset} from "expo-asset";
-import HistoryMenu from "@/components/history-menu";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import IconComponent from "@/components/icon-component";
-import HistoryLegend from "@/components/history-legend";
+import {HistoryMenu} from "@/components/history-menu";
+import {IconComponent} from "@/components/icon-component";
+import {HistoryLegend} from "@/components/history-legend";
 import {useMyTheme} from "@/hooks/useCustomTheme";
-import SettingsMenu from "@/components/settings-menu";
+import {SettingsMenu} from "@/components/settings-menu";
 import {useResponsiveScaling} from "@/hooks/use-responsive-scaling";
+import {getCurrentLocation, TerralertLocation} from "@/hooks/use-geolocation";
 
 export default function Terralert() {
     //-------------------
@@ -45,6 +41,8 @@ export default function Terralert() {
     // General app states
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<unknown>(null);
+    //const {location, locationError, locationLoading} = useGeolocation(); // continuous tracking hook
+    const [location, setLocation] = useState<TerralertLocation | null>(null);
 
     // Menus
     const [categoryMenuVisibility, toggleCategoryMenuVisibility] = useState(false);
@@ -146,9 +144,32 @@ export default function Terralert() {
         setRegion(region);
     }
 
+    const closeAllMenus = () => {
+        toggleRegionMenuVisibility(false);
+        toggleHistoryMenuVisibility(false);
+        toggleSettingsMenuVisibility(false);
+        toggleCategoryMenuVisibility(false);
+    }
+
     //-------------------
     // Use Effects
     //-------
+    useEffect(() => {
+        async function loadLocation() {
+            try {
+                const loc = await getCurrentLocation();
+                console.log(loc.latitude + " " + loc.longitude)
+                setLocation(loc);
+            } catch (e) {
+                setError((e as Error).message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        loadLocation();
+    }, []);
+
     useEffect(() => {
         if (region !== null) {
             const coords = regionToBoundingBoxCoords(region);
@@ -163,7 +184,7 @@ export default function Terralert() {
                 animated: true,
             });
         }
-    }, [region]);
+    }, [region, responsiveScaling]);
 
     useEffect(() => {
         async function load() {
@@ -182,7 +203,7 @@ export default function Terralert() {
         }
 
         load();
-    }, [category])
+    }, [category, comparisonActive])
 
     useEffect( () => {
         if (eventData != null && !comparisonActive) {
@@ -330,18 +351,24 @@ export default function Terralert() {
                     style={styles.map}
                     provider={PROVIDER_GOOGLE}
                     ref={mapRef}
-                    initialRegion={{
-                        latitude: -25,
-                        longitude: -165,
-                        latitudeDelta: 65,
-                        longitudeDelta: 117,
+                    region={{
+                        latitude: location ? location?.latitude : -25,
+                        longitude: location ? location?.longitude : -165,
+                        latitudeDelta: 30,
+                        longitudeDelta: 60,
                     }}
 
                     onRegionChange={(region, details) => {
                         if(details.isGesture && !comparisonActive) {
                             onRegionChange(null)
                         }
-                    }}>
+                    }}
+                    onPress={closeAllMenus}
+                >
+                    {location &&
+                        <Marker coordinate={{ latitude: location.latitude, longitude: location.longitude}}>
+                        </Marker>
+                    }
                     {activeMarkers.map((m, index) => (
                         <Marker
                             pinColor={comparisonActive ? m.color : undefined}
@@ -358,7 +385,7 @@ export default function Terralert() {
                             )}
                         </Marker>
                     ))}
-                    {!comparisonActive && category.category == "st" && currentEventLines.map((poly, index) => (
+                    {!comparisonActive && category.category === "st" && currentEventLines.map((poly, index) => (
                         <Polyline
                             key={`poly-${index}`}
                             coordinates={poly.coordinates}

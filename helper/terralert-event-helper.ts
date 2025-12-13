@@ -1,9 +1,7 @@
 import {TerralertEvent, Category, Source, TerralertGeometry, TerralertCoordinates} from "@/model/event";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {ImageURISource} from "react-native";
-import {getIconPathForCategory, getImageForEventByCategory, IconInfo} from "@/helper/ui-helper";
+import {getIconPathForCategory, IconInfo} from "@/helper/ui-helper";
 import {MAX_COORD_JUMP, pinColors} from "@/constants/constants";
-import {json} from "node:stream/consumers";
 
 type RawCoordinateObj = {
     PointCoordinates?: number[] | null;

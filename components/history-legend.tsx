@@ -1,6 +1,5 @@
-import {useTheme} from "@react-navigation/native";
 import {StyleSheet, View} from "react-native";
-import IconComponent from "@/components/icon-component";
+import {IconComponent} from "@/components/icon-component";
 import {pinColors} from "@/constants/constants";
 import {ThemedText} from "@/components/themed-text";
 import {useMyTheme} from "@/hooks/useCustomTheme";
@@ -67,4 +66,3 @@ const styles = StyleSheet.create({
     }
 })
 
-export default HistoryLegend;

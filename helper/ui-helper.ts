@@ -1,7 +1,6 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import {Category} from "@/model/event";
-import { Asset } from 'expo-asset';
 
 export type IconLibraries = "MaterialIcons" | "MaterialCommunityIcons";
 
