@@ -1,6 +1,6 @@
 import 'react-native-reanimated';
 import {ThemedView} from "@/components/themed-view";
-import {StyleSheet, TouchableOpacity} from "react-native";
+import {ActivityIndicator, StyleSheet, TouchableOpacity} from "react-native";
 import MapView, {Marker, Polyline, PROVIDER_GOOGLE,} from "react-native-maps";
 import {OptionsStack, OptionItem} from "@/components/option-stack";
 import {useEffect, useRef, useState} from "react";
@@ -13,7 +13,7 @@ import {
     parseTerralertEvent,
     TerralertMapMarker, TerralertPolyLine
 } from "@/helper/terralert-event-helper";
-import {icons, parseCategoryToFullName} from "@/helper/ui-helper";
+import {icons, LoadingState, parseCategoryToFullName} from "@/helper/ui-helper";
 import {getCurrentEvents, getEventsByCategoryRegionAndYear} from "@/api/terralert-client";
 import {regionToBoundingBoxCoords, TerralertRegion} from "@/helper/terralert-region-helper";
 import {MenuActions, MenuBar} from "@/components/menu-bar";
@@ -39,8 +39,9 @@ export default function Terralert() {
     // States
     //-------
     // General app states
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<unknown>(null);
+    const [loading, setLoading] = useState<LoadingState>({
+        status: 'idle',
+    });
     //const {location, locationError, locationLoading} = useGeolocation(); // continuous tracking hook
     const [location, setLocation] = useState<TerralertLocation | null>(null);
 
@@ -161,9 +162,9 @@ export default function Terralert() {
                 console.log(loc.latitude + " " + loc.longitude)
                 setLocation(loc);
             } catch (e) {
-                setError((e as Error).message);
+                setLoading({status: "error", message: (e as Error).message});
             } finally {
-                setLoading(false);
+                setLoading({status: "idle"});
             }
         }
 
@@ -189,16 +190,18 @@ export default function Terralert() {
     useEffect(() => {
         async function load() {
             try {
+                setLoading({status: "loading", message: 'CATEGORY'});
                 console.log("Loading events for Category: ", category.category);
                 const events = await getCurrentEvents(category);
                 setEventData(events);
                 if(!comparisonActive) {
                     setRegion(null);
                 }
-            } catch (error) {
-                setError(error);
+            } catch (e) {
+                setLoading({status: "error", message: (e as Error).message});
             } finally {
-                setLoading(false);
+                setLoading({status: "idle"});
+                //setLoading({status: "error", message: "test test test test test test test test test test test test test test test test test test"})
             }
         }
 
@@ -207,6 +210,7 @@ export default function Terralert() {
 
     useEffect( () => {
         if (eventData != null && !comparisonActive) {
+            setLoading({status: "loading", message: "EVENTS"})
             setMarkers(getMarkersForEvents(eventData))
             let eventPolyLines: TerralertPolyLine[] = [];
             eventData.forEach(event => {
@@ -216,22 +220,25 @@ export default function Terralert() {
                 }
             })
             setCurrentEventLines(eventPolyLines);
+            setLoading({status: "idle"})
+            //setLoading({status: "error", message: "test test test test test test test test test test test test test test test test test test"})
         }
     }, [eventData, comparisonActive])
 
     useEffect(() => {
         async function load() {
             try {
+                setLoading({status: "loading", message: "EVENTS"});
                 let eventArrays: TerralertEvent[][] = []
                 for (const year of historyTimeFrame) {
                     const eventsForYear = await getEventsByCategoryRegionAndYear(category, region!, year);
                     eventArrays.push(eventsForYear);
                 }
                 setHistoryEventArrays(eventArrays);
-            } catch (error) {
-                setError(error);
+            } catch (e) {
+                setLoading({status: "error", message: (e as Error).message})
             } finally {
-                setLoading(false);
+                setLoading({status: "idle"});
             }
         }
 
@@ -330,7 +337,11 @@ export default function Terralert() {
                             paddingVertical: responsiveScaling.scale(2),
                             paddingHorizontal: responsiveScaling.scale(5),
                         }]}>
-                        <TouchableOpacity onPress={() => {setComparisonActive(false); onRegionChange(null);}}>
+                        <TouchableOpacity onPress={() => {
+                            setComparisonActive(false);
+                            onRegionChange(null);
+                            toggleHistoryMenuVisibility(false);
+                        }}>
                             <ThemedText style={[
                                 styles.statusBarText,
                                 {
@@ -347,6 +358,84 @@ export default function Terralert() {
             </ThemedView>
 
             <ThemedView style={styles.mapContainer}>
+                {(loading.status === "loading" || loading.status === "error") &&
+                    <ThemedView style={[
+                        styles.loadingSpinnerBackground
+                    ]}>
+                        {loading.status === "loading" &&
+                            <ThemedView style={[
+                                styles.loadingSpinnerContainer,
+                                {
+                                    width: responsiveScaling.scale(250),
+                                    height: "auto",
+                                    backgroundColor: colors.background,
+                                    borderColor: colors.border,
+                                    paddingHorizontal: responsiveScaling.scale(20),
+                                    paddingVertical: responsiveScaling. scale(60)
+                                }
+                            ]}>
+                                <ActivityIndicator size={"large"}/>
+                                <ThemedText style={[
+                                    {
+                                        fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                                        fontWeight: "bold",
+                                        marginTop: responsiveScaling.scale(20),
+                                    }
+                                ]}
+                                >
+                                    {"LOADING " + loading.message + "..."}
+                                </ThemedText>
+                            </ThemedView>
+                        }
+
+                        {loading.status === "error" &&
+                            <ThemedView style={[
+                                styles.loadingSpinnerContainer,
+                                {
+                                    width: responsiveScaling.scale(250),
+                                    height: "auto",
+                                    backgroundColor: colors.background,
+                                    borderColor: colors.border,
+                                    paddingHorizontal: responsiveScaling.scale(20),
+                                    paddingVertical: responsiveScaling. scale(40)
+
+                                }
+                            ]}>
+                                <IconComponent library={"MaterialIcons"} name={"error"} size={40} color={colors.text}></IconComponent>
+                                <ThemedText style={[
+                                    {
+                                        fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                                        fontWeight: "bold",
+                                        marginTop: responsiveScaling.scale(20),
+                                    }
+                                ]}>
+                                    ERROR OCCURED:
+                                </ThemedText>
+                                <ThemedText style={[
+                                    {
+                                        fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                                        fontWeight: "bold",
+                                        marginTop: responsiveScaling.scale(10),
+                                        textAlign: "center"
+                                    }
+                                ]}>
+                                    {loading.message.toUpperCase()}
+                                </ThemedText>
+                                <ThemedText style={[
+                                    {
+                                        fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                                        fontWeight: "bold",
+                                        marginTop: responsiveScaling.scale(20),
+                                    }
+                                ]}>
+                                    PLEASE RETRY
+                                </ThemedText>
+                            </ThemedView>
+                        }
+
+                    </ThemedView>
+                }
+
                 <MapView
                     style={styles.map}
                     provider={PROVIDER_GOOGLE}
@@ -512,6 +601,23 @@ const styles = StyleSheet.create({
 
     statusBarText: {
         fontWeight: "bold"
+    },
+
+    loadingSpinnerBackground: {
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(255, 255, 255, 0.5)',
+        zIndex: 99,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    loadingSpinnerContainer: {
+        borderRadius: 10,
+        borderWidth: 0.5,
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
     },
 
     mapContainer: {

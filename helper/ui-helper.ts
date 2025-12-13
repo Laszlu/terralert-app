@@ -61,3 +61,8 @@ export function getImageForEventByCategory(category: Category): any {
             return "";
     }
 }
+
+export type LoadingState =
+    | { status: 'idle' }
+    | { status: 'loading'; message: string }
+    | { status: 'error'; message: string };
