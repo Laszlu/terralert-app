@@ -141,7 +141,7 @@ export function HistoryMenu(props: HistoryMenuProps) {
                 <ThemedText style={[
                     styles.historyMenuText,
                     {
-                        width: '30%',
+                        width: responsiveScaling.scale(120),
                         fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
                         marginHorizontal: responsiveScaling.scale(5),
                     }]}>
@@ -167,7 +167,7 @@ export function HistoryMenu(props: HistoryMenuProps) {
                 <ThemedText style={[
                     styles.historyMenuText,
                     {
-                        width: '30%',
+                        width: responsiveScaling.scale(120),
                         fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
                         marginHorizontal: responsiveScaling.scale(5),
                     }]}>
@@ -205,7 +205,7 @@ export function HistoryMenu(props: HistoryMenuProps) {
                 <ThemedText style={[
                     styles.historyMenuText,
                     {
-                        width: '30%',
+                        width: responsiveScaling.scale(120),
                         fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
                         marginHorizontal: responsiveScaling.scale(5),
                     }]}>

@@ -37,13 +37,17 @@ export function Dropdown(props: DropdownProps) {
                     styles.button,
                     {
                         backgroundColor: colors.background,
-                        borderColor: colors.border
+                        borderColor: colors.border,
+                        padding: responsiveScaling.scale(5),
                     },
                     props.disabled && {opacity: 0.5}
                 ]}
                 onPress={() => !props.disabled && setVisible(true)}>
                 <ThemedText style={[
-                    styles.buttonText
+                    styles.buttonText,
+                    {
+                        fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                    }
                 ]}>
                     {selectedItem ? selectedItem.label : props.placeholder}
                 </ThemedText>
@@ -56,7 +60,10 @@ export function Dropdown(props: DropdownProps) {
             >
                 <TouchableOpacity
                     style={[
-                        styles.overlay
+                        styles.overlay,
+                        {
+                            paddingHorizontal: responsiveScaling.scale(20),
+                        }
                     ]}
                     activeOpacity={1}
                     onPress={() => setVisible(false)}
@@ -65,7 +72,10 @@ export function Dropdown(props: DropdownProps) {
                         styles.dropdown,
                         {
                             backgroundColor: colors.background,
-                            borderColor: colors.border
+                            borderColor: colors.border,
+                            paddingVertical: responsiveScaling.scale(8),
+                            paddingHorizontal: responsiveScaling.scale(20),
+                            width: responsiveScaling.scale(250),
                         }]}>
                         <FlatList
                             data={props.items}
@@ -74,9 +84,20 @@ export function Dropdown(props: DropdownProps) {
                                 <TouchableOpacity style={[
                                     styles.item,
                                     {
-                                        borderColor: colors.border
-                                    }]} onPress={() => handleSelect(item)}>
-                                    <ThemedText style={[styles.itemText, {color: colors.text}]}>{item.label}</ThemedText>
+                                        borderColor: colors.border,
+                                        paddingVertical: responsiveScaling.scale(5),
+                                        paddingHorizontal: responsiveScaling.scale(10),
+                                        marginBottom: responsiveScaling.scale(5),
+                                    }]}
+                                    onPress={() => handleSelect(item)}>
+                                    <ThemedText style={[
+                                        styles.itemText,
+                                        {
+                                            color: colors.text,
+                                            fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                                        }]}>
+                                        {item.label}
+                                    </ThemedText>
                                 </TouchableOpacity>
                             )}
                         />
@@ -90,35 +111,26 @@ export function Dropdown(props: DropdownProps) {
 const styles = StyleSheet.create({
     button: {
         borderWidth: 1,
-        padding: 5,
         borderRadius: 8,
     },
     buttonText: {
-        fontSize: 16,
         fontWeight: "bold",
     },
     overlay: {
         flex: 1,
         backgroundColor: "rgba(0,0,0,0.3)",
         justifyContent: "center",
-        paddingHorizontal: 20,
         alignItems: "center"
     },
     dropdown: {
-        paddingVertical: 8,
-        paddingHorizontal: 20,
         borderRadius: 8,
         height: "auto",
-        width: '70%',
         borderWidth: 0.5,
     },
     item: {
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        marginBottom: 5,
+
     },
     itemText: {
-        fontSize: 16,
         fontWeight: "bold",
     }
 });

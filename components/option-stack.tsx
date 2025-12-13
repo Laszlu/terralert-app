@@ -31,7 +31,7 @@ export function OptionsStack(optionsStackProps: OptionsStackProps) {
                 backgroundColor: colors.background,
                 borderColor: colors.border,
                 paddingVertical: responsiveScaling.scale(10),
-                paddingHorizontal: responsiveScaling.scale(80),
+                paddingHorizontal: responsiveScaling.scale(20),
             }]}>
             {optionsStackProps.options.map((item, index) => (
                 <TouchableOpacity
