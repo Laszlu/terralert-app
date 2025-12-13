@@ -5,6 +5,7 @@ import {StyleSheet} from "react-native";
 import {useCategoryState} from "@/components/category-state-context";
 import {getIconPathForCategory} from "@/helper/ui-helper";
 import {useMyTheme} from "@/hooks/useCustomTheme";
+import {useResponsiveScaling} from "@/hooks/use-responsive-scaling";
 
 export type MenuActions = {
     changeCategory: () => void;
@@ -24,12 +25,22 @@ type MenuBarProps = {
 
 export function MenuBar({actions, disabled, categoryOpened, regionOpened, historyOpened, settingsOpened}: MenuBarProps) {
     const {colors} = useMyTheme()
+    const responsiveScaling = useResponsiveScaling();
     const {category, setCategory} = useCategoryState();
 
     const categoryIcon = getIconPathForCategory(category.category);
 
     return (
-        <ThemedView style={[styles.menuBar, {backgroundColor: colors.background, borderColor: colors.border}]}>
+        <ThemedView style={[
+            styles.menuBar,
+            {
+                backgroundColor: colors.background,
+                borderColor: colors.border,
+                paddingTop: responsiveScaling.scale(10),
+                paddingBottom: responsiveScaling.scale(20),
+                paddingHorizontal: responsiveScaling.scale(25)
+
+            }]}>
             <ThemedButton title={"CATEGORY"} iconName={categoryIcon.iconName} iconLibrary={categoryIcon.iconLibrary} onPress={actions.changeCategory} disabled={disabled} selected={categoryOpened}></ThemedButton>
             <ThemedButton title={"REGION"} iconName={"earth"} iconLibrary={"MaterialCommunityIcons"} onPress={actions.changeRegion} disabled={disabled} selected={regionOpened}></ThemedButton>
             <ThemedButton title={"HISTORY"} iconName={"history"} iconLibrary={"MaterialIcons"} onPress={actions.openHistory}  disabled={category.category === "vo"} selected={historyOpened}></ThemedButton>
@@ -42,11 +53,8 @@ const styles = StyleSheet.create({
         menuBar: {
             flexDirection: "row",
             justifyContent: "space-between",
-            alignItems: "center", // sample bg to visualize
+            alignItems: "center",
             width: "100%",
-            paddingTop: 10,
-            paddingBottom: 20,
-            paddingHorizontal: 25,
         },
     }
 )

@@ -9,6 +9,7 @@ import ThemedButton from "@/components/themed-button";
 import {useCategoryState} from "@/components/category-state-context";
 import {parseCategoryToFullName} from "@/helper/ui-helper";
 import {useMyTheme} from "@/hooks/useCustomTheme";
+import {useResponsiveScaling} from "@/hooks/use-responsive-scaling";
 
 export type HistoryMenuProps = {
     regions: TerralertRegion[];
@@ -20,7 +21,8 @@ export type HistoryMenuProps = {
 }
 
 export function HistoryMenu(props: HistoryMenuProps) {
-    const {colors} = useMyTheme()
+    const {colors} = useMyTheme();
+    const responsiveScaling = useResponsiveScaling();
     const {category, setCategory} = useCategoryState();
 
     const today = new Date();
@@ -97,26 +99,95 @@ export function HistoryMenu(props: HistoryMenuProps) {
     }
 
     return(
-        <View style={[styles.historyMenuView, {backgroundColor: colors.background, borderColor: colors.border}]}>
-            <View style={[styles.historyMenuHeader]}>
-                <ThemedText style={[styles.historyMenuText]}>
+        <View style={[
+            styles.historyMenuView,
+            {
+                backgroundColor: colors.background,
+                borderColor: colors.border,
+                paddingVertical: responsiveScaling.scale(10),
+            }]}>
+            <View style={[
+                styles.historyMenuHeader,
+                {
+                    paddingVertical: responsiveScaling.scale(10)
+                }
+            ]}>
+                <ThemedText style={[
+                    styles.historyMenuText,
+                    {
+                        fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                        marginHorizontal: responsiveScaling.scale(5),
+                    }
+                ]}>
                     Historical Comparison
                 </ThemedText>
-                {!validComparison && <ThemedText style={[styles.historyMenuErrorText, {}]}>VALUES FOR COMPARISON ARE MISSING</ThemedText>}
+                {!validComparison &&
+                    <ThemedText style={[
+                        styles.historyMenuErrorText,
+                        {
+                            fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 14 : 12),
+                            marginHorizontal: responsiveScaling.scale(5),
+                        }]}>
+                        VALUES FOR COMPARISON ARE MISSING
+                    </ThemedText>}
             </View>
-            <View style={[styles.historyMenuRow]}>
-                <ThemedText style={[styles.historyMenuText, {width: '30%'}]}>CATEGORY:</ThemedText>
-                <ThemedText style={[styles.historyMenuText]}>{parseCategoryToFullName(category.category).toUpperCase()}</ThemedText>
+            <View style={[
+                styles.historyMenuRow,
+                {
+                    paddingVertical: responsiveScaling.scale(10),
+                    paddingHorizontal: responsiveScaling.scale(15),
+                }
+            ]}>
+                <ThemedText style={[
+                    styles.historyMenuText,
+                    {
+                        width: '30%',
+                        fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                        marginHorizontal: responsiveScaling.scale(5),
+                    }]}>
+                    CATEGORY:
+                </ThemedText>
+                <ThemedText style={[
+                    styles.historyMenuText,
+                    {
+                        fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                        marginHorizontal: responsiveScaling.scale(5),
+                    }
+                ]}>
+                    {parseCategoryToFullName(category.category).toUpperCase()}
+                </ThemedText>
             </View>
-            <View style={[styles.historyMenuRow]}>
-                <ThemedText style={[styles.historyMenuText, {width: '30%'}]}>TIMEFRAME:</ThemedText>
+            <View style={[
+                styles.historyMenuRow,
+                {
+                    paddingVertical: responsiveScaling.scale(10),
+                    paddingHorizontal: responsiveScaling.scale(15),
+                }
+            ]}>
+                <ThemedText style={[
+                    styles.historyMenuText,
+                    {
+                        width: '30%',
+                        fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                        marginHorizontal: responsiveScaling.scale(5),
+                    }]}>
+                    TIMEFRAME:
+                </ThemedText>
                 <Dropdown
                     items={possibleStartYearItems}
                     onChange={(selectedYear) => {handleYearSelected(selectedYear, yearEnd)}}
                     value={yearStart.value}
                     placeholder={'START'}
                 />
-                <ThemedText style={[styles.historyMenuText]}> - </ThemedText>
+                <ThemedText style={[
+                    styles.historyMenuText,
+                    {
+                        fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                        marginHorizontal: responsiveScaling.scale(5),
+                    }
+                ]}>
+                    -
+                </ThemedText>
                 <Dropdown
                     items={possibleEndYearItems}
                     onChange={(selectedYear) => {handleYearSelected(yearStart, selectedYear)}}
@@ -124,8 +195,22 @@ export function HistoryMenu(props: HistoryMenuProps) {
                     placeholder={'END'}
                 />
             </View>
-            <View style={[styles.historyMenuRow]}>
-                <ThemedText style={[styles.historyMenuText, {width: '30%'}]}>REGION:</ThemedText>
+            <View style={[
+                styles.historyMenuRow,
+                {
+                    paddingVertical: responsiveScaling.scale(10),
+                    paddingHorizontal: responsiveScaling.scale(15),
+                }
+            ]}>
+                <ThemedText style={[
+                    styles.historyMenuText,
+                    {
+                        width: '30%',
+                        fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                        marginHorizontal: responsiveScaling.scale(5),
+                    }]}>
+                    REGION:
+                </ThemedText>
                 <Dropdown
                     items={selectableRegions}
                     onChange={(selectedRegion) => handleRegionSelected(selectedRegion)}
@@ -133,7 +218,12 @@ export function HistoryMenu(props: HistoryMenuProps) {
                     placeholder={'REGION'}
                 />
             </View>
-            <View style={[styles.historyMenuHeader]}>
+            <View style={[
+                styles.historyMenuHeader,
+                {
+                    paddingVertical: responsiveScaling.scale(10)
+                }
+            ]}>
                 <ThemedButton title={'START COMPARISON'} iconName={'history'} iconLibrary={"MaterialIcons"} onPress={() => {startComparison()}} disabled={false} selected={false}/>
             </View>
         </View>
@@ -148,19 +238,14 @@ const styles = StyleSheet.create({
         width: '100%',
         borderTopWidth: 1,
         borderBottomWidth: 0.5,
-        paddingVertical: 10,
     },
 
     historyMenuText: {
         fontWeight: "bold",
-        fontSize: 16,
-        marginHorizontal: 5,
     },
 
     historyMenuErrorText: {
         fontWeight: "bold",
-        fontSize: 12,
-        marginHorizontal: 5,
         color: 'red'
     },
 
@@ -168,7 +253,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: 'center',
         width: '100%',
-        paddingVertical: 10
     },
 
     historyMenuRow: {
@@ -176,8 +260,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         width: '100%',
         justifyContent: 'flex-start',
-        paddingVertical: 10,
-        paddingHorizontal: 15,
     }
 })
 

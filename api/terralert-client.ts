@@ -3,7 +3,9 @@ import {parseTerralertEvents} from "@/helper/terralert-event-helper";
 import {CategoryState} from "@/components/category-state-context";
 import {TerralertRegion} from "@/helper/terralert-region-helper";
 
-const baseUri = 'http://localhost:5210';
+const baseUri =
+    //'http://localhost:5210';
+    'https://terralertapi-3avna.ondigitalocean.app';
 const eventUri = '/api/events/';
 const currentUri = '/current';
 

@@ -3,6 +3,7 @@ import {FlatList, Modal, TouchableOpacity, View, StyleSheet} from "react-native"
 import {ThemedText} from "@/components/themed-text";
 import {useTheme} from "@react-navigation/native";
 import {useMyTheme} from "@/hooks/useCustomTheme";
+import {useResponsiveScaling} from "@/hooks/use-responsive-scaling";
 
 export type DropdownItem = {
     label: string;
@@ -18,7 +19,8 @@ export type DropdownProps = {
 }
 
 export function Dropdown(props: DropdownProps) {
-    const {colors} = useMyTheme()
+    const {colors} = useMyTheme();
+    const responsiveScaling = useResponsiveScaling();
     const [visible, setVisible] = useState(false);
 
     const selectedItem = props.items.find(item => item.value === props.value);
@@ -32,10 +34,17 @@ export function Dropdown(props: DropdownProps) {
         <>
             <TouchableOpacity
                 style={[
-                    styles.button,{ backgroundColor: colors.background, borderColor: colors.border }, props.disabled && {opacity: 0.5}
+                    styles.button,
+                    {
+                        backgroundColor: colors.background,
+                        borderColor: colors.border
+                    },
+                    props.disabled && {opacity: 0.5}
                 ]}
                 onPress={() => !props.disabled && setVisible(true)}>
-                <ThemedText style={styles.buttonText}>
+                <ThemedText style={[
+                    styles.buttonText
+                ]}>
                     {selectedItem ? selectedItem.label : props.placeholder}
                 </ThemedText>
             </TouchableOpacity>
@@ -46,16 +55,27 @@ export function Dropdown(props: DropdownProps) {
                 animationType="fade"
             >
                 <TouchableOpacity
-                    style={styles.overlay}
+                    style={[
+                        styles.overlay
+                    ]}
                     activeOpacity={1}
                     onPress={() => setVisible(false)}
                 >
-                    <View style={[styles.dropdown, {backgroundColor: colors.background, borderColor: colors.border}]}>
+                    <View style={[
+                        styles.dropdown,
+                        {
+                            backgroundColor: colors.background,
+                            borderColor: colors.border
+                        }]}>
                         <FlatList
                             data={props.items}
                             keyExtractor={(item) => item.value.toString()}
                             renderItem={({item}) => (
-                                <TouchableOpacity style={[styles.item, {borderColor: colors.border}]} onPress={() => handleSelect(item)}>
+                                <TouchableOpacity style={[
+                                    styles.item,
+                                    {
+                                        borderColor: colors.border
+                                    }]} onPress={() => handleSelect(item)}>
                                     <ThemedText style={[styles.itemText, {color: colors.text}]}>{item.label}</ThemedText>
                                 </TouchableOpacity>
                             )}

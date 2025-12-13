@@ -30,13 +30,14 @@ import IconComponent from "@/components/icon-component";
 import HistoryLegend from "@/components/history-legend";
 import {useMyTheme} from "@/hooks/useCustomTheme";
 import SettingsMenu from "@/components/settings-menu";
+import {useResponsiveScaling} from "@/hooks/use-responsive-scaling";
 
 export default function Terralert() {
     //-------------------
     // Visual Setup
     //-------
     const { colors } = useMyTheme();
-    const {height, width, scale, fontScale} = useWindowDimensions();
+    const responsiveScaling = useResponsiveScaling();
 
     //-------------------
     // States
@@ -153,7 +154,12 @@ export default function Terralert() {
             const coords = regionToBoundingBoxCoords(region);
 
             mapRef.current?.fitToCoordinates(coords, {
-                edgePadding: {top: 50, right: 80, bottom: 80, left: 80},
+                edgePadding: {
+                    top: responsiveScaling.scale(50),
+                    right: responsiveScaling.scale(80),
+                    bottom: responsiveScaling.scale(80),
+                    left: responsiveScaling.scale(80)
+                },
                 animated: true,
             });
         }
@@ -243,12 +249,34 @@ export default function Terralert() {
     return(
         <ThemedView style={styles.mainContainer}>
 
-            <ThemedView style={[styles.statusBarContainer, {backgroundColor: colors.background}]}>
-                <ThemedView style={[styles.statusBar, {backgroundColor: colors.background}]}>
-                    <ThemedText style={[styles.statusBarText, {color: colors.notification}]}>
+            <ThemedView style={[
+                styles.statusBarContainer,
+                    {
+                    backgroundColor: colors.background,
+                    paddingTop: responsiveScaling.scale(60)
+                }]}>
+                <ThemedView style={[
+                    styles.statusBar,
+                    {
+                        backgroundColor: colors.background,
+                        paddingHorizontal: responsiveScaling.scale(5)
+                    }]}>
+                    <ThemedText style={[
+                        styles.statusBarText,
+                        {
+                            color: colors.notification,
+                            marginHorizontal: responsiveScaling.scale(5),
+                            fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 16 : 13),
+                        }]}>
                         {"CATEGORY: " + parseCategoryToFullName(category.category).toUpperCase()}
                     </ThemedText>
-                    <ThemedText style={[styles.statusBarText, {color: colors.notification}]}>
+                    <ThemedText style={[
+                        styles.statusBarText,
+                        {
+                            color: colors.notification,
+                            marginHorizontal: responsiveScaling.scale(5),
+                            fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 16 : 13),
+                        }]}>
                         {"EVENTS: " + (eventData != null ? eventData.length : "0")}
                     </ThemedText>
                 </ThemedView>
@@ -258,17 +286,37 @@ export default function Terralert() {
                             backgroundColor: colors.background,
                             borderColor: colors.border,
                             borderBottomWidth: (comparisonActive ? 0 : 1),
-                            paddingBottom: 2
+                            paddingBottom: responsiveScaling.scale(2),
+                            paddingHorizontal: responsiveScaling.scale(5),
                         }]}
                 >
-                    <ThemedText style={[styles.statusBarText, {color: colors.notification}]}>
+                    <ThemedText style={[
+                        styles.statusBarText,
+                        {
+                            color: colors.notification,
+                            marginHorizontal: responsiveScaling.scale(5),
+                            fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 16 : 13),
+                        }]}>
                         {"REGION: " + (region !== null ? region.description.toUpperCase() : "NONE")}
                     </ThemedText>
                 </ThemedView>
                 {comparisonActive &&
-                    <ThemedView style={[styles.comparisonInfo, {backgroundColor: colors.background, borderColor: colors.border}]}>
+                    <ThemedView style={[
+                        styles.comparisonInfo,
+                        {
+                            backgroundColor: colors.background,
+                            borderColor: colors.border,
+                            paddingVertical: responsiveScaling.scale(2),
+                            paddingHorizontal: responsiveScaling.scale(5),
+                        }]}>
                         <TouchableOpacity onPress={() => {setComparisonActive(false); onRegionChange(null);}}>
-                            <ThemedText style={[styles.statusBarText, {color: colors.notification, fontSize: 16}]}>
+                            <ThemedText style={[
+                                styles.statusBarText,
+                                {
+                                    color: colors.notification,
+                                    fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                                    marginHorizontal: responsiveScaling.scale(5),
+                                }]}>
                                 TAP HERE TO END COMPARISON
                             </ThemedText>
                         </TouchableOpacity>
@@ -329,20 +377,43 @@ export default function Terralert() {
                 </MapView>
             </ThemedView>
 
-            <ThemedView style={[styles.menuBarContainer, {borderColor: colors.border}]}>
-                <ThemedView style={[styles.legendContainer, comparisonActive ? styles.display_true : styles.display_false, {justifyContent: 'flex-start', backgroundColor: colors.background, borderColor: colors.border}]}>
+            <ThemedView style={[
+                styles.menuBarContainer,
+                {
+                    borderColor: colors.border
+                }]}>
+                <ThemedView style={[
+                    styles.legendContainer,
+                    comparisonActive ? styles.display_true : styles.display_false,
+                    {
+                        justifyContent: 'flex-start',
+                        backgroundColor: colors.background,
+                        borderColor: colors.border
+                    }]}>
                     <HistoryLegend years={historyTimeFrame}/>
                 </ThemedView>
-                <ThemedView style={[styles.optionsContainer, categoryMenuVisibility ? styles.display_true : styles.display_false]}>
+                <ThemedView style={[
+                    styles.optionsContainer,
+                    categoryMenuVisibility ? styles.display_true : styles.display_false
+                ]}>
                     <OptionsStack options={categoryOptions}/>
                 </ThemedView>
-                <ThemedView style={[styles.optionsContainer, regionMenuVisibility ? styles.display_true : styles.display_false]}>
+                <ThemedView style={[
+                    styles.optionsContainer,
+                    regionMenuVisibility ? styles.display_true : styles.display_false
+                ]}>
                     <OptionsStack options={regionOptions}/>
                 </ThemedView>
-                <ThemedView style={[styles.optionsContainer, settingsMenuVisibility ? styles.display_true : styles.display_false]}>
+                <ThemedView style={[
+                    styles.optionsContainer,
+                    settingsMenuVisibility ? styles.display_true : styles.display_false
+                ]}>
                     <SettingsMenu/>
                 </ThemedView>
-                <ThemedView style={[styles.optionsContainer, historyMenuVisibility ? styles.display_true : styles.display_false]}>
+                <ThemedView style={[
+                    styles.optionsContainer,
+                    historyMenuVisibility ? styles.display_true : styles.display_false
+                ]}>
                     <HistoryMenu
                         region={region}
                         setRegion={setRegion}
@@ -391,8 +462,7 @@ const styles = StyleSheet.create({
         left: 0,
         zIndex: 100,
         height: 'auto',
-        flexDirection: "column",
-        paddingTop: '15%'
+        flexDirection: "column"
     },
 
     statusBar: {
@@ -400,7 +470,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        paddingHorizontal: 5,
         height: 'auto'
     },
 
@@ -409,17 +478,13 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        paddingVertical: 2,
-        paddingHorizontal: 5,
         borderBottomWidth: 1,
         borderTopWidth: 0.2,
         height: 'auto'
     },
 
     statusBarText: {
-        fontWeight: "bold",
-        fontSize: 13,
-        marginHorizontal: 5,
+        fontWeight: "bold"
     },
 
     mapContainer: {
