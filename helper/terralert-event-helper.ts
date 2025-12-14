@@ -2,6 +2,7 @@ import {TerralertEvent, Category, Source, TerralertGeometry, TerralertCoordinate
 import {ImageURISource} from "react-native";
 import {getIconPathForCategory, IconInfo} from "@/helper/ui-helper";
 import {MAX_COORD_JUMP, pinColors} from "@/constants/constants";
+import {CategoryState} from "@/components/category-state-context";
 
 type RawCoordinateObj = {
     PointCoordinates?: number[] | null;
@@ -24,6 +25,19 @@ export type TerralertMapMarker = {
 export type TerralertPolyLine = {
     coordinates: { latitude: number; longitude: number }[];
     color?: string;
+}
+
+export function parseCategoryStateToDbId(category: CategoryState) : string {
+    switch (category.category) {
+        case "st":
+            return "severeStorms";
+        case "vo":
+            return "volcanoes";
+        case "ea":
+            return "earthquakes";
+        default:
+            return "";
+    }
 }
 
 function filterOutlierCoordinates(geometry: TerralertGeometry[]): TerralertGeometry[] {

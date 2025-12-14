@@ -9,12 +9,12 @@ import testEvent from '../model/TestEvent.json'
 import {TerralertEvent} from "@/model/event";
 import {
     geometryToMarkers,
-    getMarkersForEvents, getMarkersForHistoryEvents, getPolylineForEventWithColor,
+    getMarkersForEvents, getMarkersForHistoryEvents, getPolylineForEventWithColor, parseCategoryStateToDbId,
     parseTerralertEvent,
     TerralertMapMarker, TerralertPolyLine
 } from "@/helper/terralert-event-helper";
 import {icons, LoadingState, parseCategoryToFullName} from "@/helper/ui-helper";
-import {getCurrentEvents, getEventsByCategoryRegionAndYear} from "@/api/terralert-client";
+import {getEventsByCategoryRegionAndYear} from "@/api/terralert-client";
 import {regionToBoundingBoxCoords, TerralertRegion} from "@/helper/terralert-region-helper";
 import {MenuActions, MenuBar} from "@/components/menu-bar";
 import {useCategoryState} from "@/components/category-state-context";
@@ -27,6 +27,9 @@ import {useMyTheme} from "@/hooks/useCustomTheme";
 import {SettingsMenu} from "@/components/settings-menu";
 import {useResponsiveScaling} from "@/hooks/use-responsive-scaling";
 import {getCurrentLocation, TerralertLocation} from "@/hooks/use-geolocation";
+import {getEventsByCategory, getEventsForRegionYearCategory, isRegionYearSynced} from "@/repositories/event-repository";
+import {useStartupSync} from "@/components/startup-sync-provider";
+import {syncRegionYear} from "@/services/event-sync-service";
 
 export default function Terralert() {
     //-------------------
@@ -39,6 +42,7 @@ export default function Terralert() {
     // States
     //-------
     // General app states
+    const { isOnline, lastSync } = useStartupSync();
     const [loading, setLoading] = useState<LoadingState>({
         status: 'idle',
     });
@@ -155,6 +159,7 @@ export default function Terralert() {
     //-------------------
     // Use Effects
     //-------
+    // loading location
     useEffect(() => {
         async function loadLocation() {
             try {
@@ -171,6 +176,7 @@ export default function Terralert() {
         loadLocation();
     }, []);
 
+    // moving map to region
     useEffect(() => {
         if (region !== null) {
             const coords = regionToBoundingBoxCoords(region);
@@ -187,27 +193,46 @@ export default function Terralert() {
         }
     }, [region, responsiveScaling]);
 
+    // loading events
     useEffect(() => {
+        let cancelled = false;
+
         async function load() {
             try {
-                setLoading({status: "loading", message: 'CATEGORY'});
+                setLoading({ status: "loading", message: "CATEGORY" });
+
+                await new Promise(resolve => setTimeout(resolve, 0));
+
                 console.log("Loading events for Category: ", category.category);
-                const events = await getCurrentEvents(category);
-                setEventData(events);
-                if(!comparisonActive) {
-                    setRegion(null);
+                const categoryId = parseCategoryStateToDbId(category);
+                const events = await getEventsByCategory(categoryId, { onlyOpen: true });
+
+                if (!cancelled) {
+                    setEventData(events);
+                    if (!comparisonActive) {
+                        setRegion(null);
+                    }
                 }
             } catch (e) {
-                setLoading({status: "error", message: (e as Error).message});
+                if (!cancelled) {
+                    setLoading({ status: "error", message: (e as Error).message });
+                }
             } finally {
-                setLoading({status: "idle"});
-                //setLoading({status: "error", message: "test test test test test test test test test test test test test test test test test test"})
+                if (!cancelled) {
+                    setLoading({ status: "idle" });
+                }
             }
         }
 
         load();
-    }, [category, comparisonActive])
 
+        return () => {
+            cancelled = true;
+        };
+    }, [category, comparisonActive]);
+
+
+    // loading markers/polylines for events
     useEffect( () => {
         if (eventData != null && !comparisonActive) {
             setLoading({status: "loading", message: "EVENTS"})
@@ -225,30 +250,55 @@ export default function Terralert() {
         }
     }, [eventData, comparisonActive])
 
+    // loading events for comparison
     useEffect(() => {
+        if (!comparisonActive) return;
+
+        let cancelled = false;
+
         async function load() {
             try {
                 setLoading({status: "loading", message: "EVENTS"});
+                await new Promise(resolve => setTimeout(resolve, 0));
+
+
+                let categoryId = parseCategoryStateToDbId(category);
                 let eventArrays: TerralertEvent[][] = []
+
                 for (const year of historyTimeFrame) {
-                    const eventsForYear = await getEventsByCategoryRegionAndYear(category, region!, year);
+                    let regionYearSynced = await isRegionYearSynced(region!, year, categoryId);
+
+                    if (!regionYearSynced) {
+                        console.log("syncing region and year: " + region!.name + " " + year)
+                        await syncRegionYear(region!, year, category);
+                    }
+
+                    const eventsForYear = await getEventsForRegionYearCategory(region!, year, categoryId);
                     eventArrays.push(eventsForYear);
                 }
-                setHistoryEventArrays(eventArrays);
+
+                if (!cancelled) {
+                    setHistoryEventArrays(eventArrays);
+                }
             } catch (e) {
-                setLoading({status: "error", message: (e as Error).message})
+                if (!cancelled) {
+                    setLoading({ status: "error", message: (e as Error).message });
+                }
             } finally {
-                setLoading({status: "idle"});
+                if (!cancelled) {
+                    setLoading({ status: "idle" });
+                }
             }
         }
 
-        if(comparisonActive) {
-            console.log("loading Comparison data");
-            load();
-        }
+        load();
 
+        return () => {
+            cancelled = true;
+        };
     }, [historyTimeFrame, comparisonActive, category, region]);
 
+    // loading markers/polylines for comparison
     useEffect(() => {
         if(historyEventArrays != null && comparisonActive) {
             let historyMarkers: TerralertMapMarker[] = [];
