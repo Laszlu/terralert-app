@@ -186,10 +186,10 @@ export default function Terralert() {
     useEffect(() => {
         let onlineStatus = ""
         if (isOnline) {
-            onlineStatus = "ONLINE - LAST SYNC TODAY"
+            onlineStatus = "ONLINE"
             setOnlineSyncStatus(onlineStatus)
         } else {
-            onlineStatus = `OFFLINE - LAST SYNC ${lastSync!.toLocaleDateString()}`
+            onlineStatus = `OFFLINE`
             setOnlineSyncStatus(onlineStatus)
         }
     }, [isOnline, lastSync]);
