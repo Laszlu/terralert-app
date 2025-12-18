@@ -20,11 +20,13 @@ export type TerralertMapMarker = {
     image?: number | ImageURISource | undefined;
     color?: string;
     icon?: IconInfo;
+    year?: number;
 };
 
 export type TerralertPolyLine = {
     coordinates: { latitude: number; longitude: number }[];
     color?: string;
+    year?: number;
 }
 
 export function parseCategoryStateToDbId(category: CategoryState) : string {
@@ -181,7 +183,8 @@ export function getMarkerForEvent(event: TerralertEvent): TerralertMapMarker | n
                 date: currentGeometry.date ?? null,
                 title: `${event.title ?? "Event"}`,
                 description: ` ${currentGeometry.date ?? ""} ${currentGeometry.magnitudeValue != null ? "- " + currentGeometry.magnitudeValue : ""}${currentGeometry.magnitudeUnit ?? ""}`,
-                icon: getIconPathForCategory(event.categories[0].id as string)
+                icon: getIconPathForCategory(event.categories[0].id as string),
+                color: event.categories[0].id === "severeStorms" ? pinColors.find(c => c.year === 2022)!.color : pinColors.find(c => c.year === 1)!.color
             }
 
             return marker;
@@ -191,11 +194,11 @@ export function getMarkerForEvent(event: TerralertEvent): TerralertMapMarker | n
     return null;
 }
 
-export function getMarkersForHistoryEvents(events: TerralertEvent[], colorIndex: number): TerralertMapMarker[] {
+export function getMarkersForHistoryEvents(events: TerralertEvent[], year: number): TerralertMapMarker[] {
     const markers: TerralertMapMarker[] = [];
 
     events.forEach(event => {
-        let marker = getMarkerForHistoryEvent(event, colorIndex);
+        let marker = getMarkerForHistoryEvent(event, year);
         if (marker != null) {
             markers.push(marker)
         }
@@ -204,7 +207,7 @@ export function getMarkersForHistoryEvents(events: TerralertEvent[], colorIndex:
     return markers;
 }
 
-export function getMarkerForHistoryEvent(event: TerralertEvent, colorIndex: number): TerralertMapMarker | null {
+export function getMarkerForHistoryEvent(event: TerralertEvent, year: number): TerralertMapMarker | null {
     const geometryCount = event.geometry.length;
     const currentGeometry = event.geometry[geometryCount - 1];
     let marker: TerralertMapMarker;
@@ -220,8 +223,9 @@ export function getMarkerForHistoryEvent(event: TerralertEvent, colorIndex: numb
                 date: currentGeometry.date ?? null,
                 title: `${event.title ?? "Event"}`,
                 description: ` ${currentGeometry.date ?? ""} ${currentGeometry.magnitudeValue != null ? "- " + currentGeometry.magnitudeValue : ""}${currentGeometry.magnitudeUnit ?? ""}`,
-                color: pinColors[colorIndex],
+                color: pinColors.find(c => c.year === year)!.color,
                 icon: getIconPathForCategory(event.categories[0].id as string),
+                year: year
             }
 
             return marker;
@@ -233,9 +237,8 @@ export function getMarkerForHistoryEvent(event: TerralertEvent, colorIndex: numb
 
 export function getPolylineForEventWithColor(
     event: TerralertEvent,
-    colorIndex: number
+    year?: number
 ): TerralertPolyLine | null {
-
     const coords: { latitude: number; longitude: number }[] = [];
 
     for (const geom of event.geometry) {
@@ -247,10 +250,18 @@ export function getPolylineForEventWithColor(
         }
     }
 
-    return {
-        coordinates: coords,
-        color: pinColors[colorIndex],
-    };
+    if (year !== null) {
+        return {
+            coordinates: coords,
+            color: pinColors.find(c => c.year === year)!.color,
+            year
+        };
+    } else {
+        return {
+            coordinates: coords,
+            color: pinColors.find(c => c.year === 2022)!.color
+        };
+    }
 }
 
 export function geometryToMarkers(geometry: TerralertGeometry[]): TerralertMapMarker[] {

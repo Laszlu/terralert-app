@@ -2,19 +2,22 @@ import 'react-native-reanimated';
 import {ThemedView} from "@/components/themed-view";
 import {ActivityIndicator, StyleSheet, TouchableOpacity} from "react-native";
 import MapView, {Marker, Polyline, PROVIDER_GOOGLE,} from "react-native-maps";
-import {OptionsStack, OptionItem} from "@/components/option-stack";
+import {OptionItem, OptionsStack} from "@/components/option-stack";
 import {useEffect, useRef, useState} from "react";
 
 import testEvent from '../model/TestEvent.json'
-import {TerralertEvent} from "@/model/event";
+import {TerralertEvent, TerralertEventListByYear} from "@/model/event";
 import {
     geometryToMarkers,
-    getMarkersForEvents, getMarkersForHistoryEvents, getPolylineForEventWithColor, parseCategoryStateToDbId,
+    getMarkersForEvents,
+    getMarkersForHistoryEvents,
+    getPolylineForEventWithColor,
+    parseCategoryStateToDbId,
     parseTerralertEvent,
-    TerralertMapMarker, TerralertPolyLine
+    TerralertMapMarker,
+    TerralertPolyLine
 } from "@/helper/terralert-event-helper";
 import {icons, LoadingState, parseCategoryToFullName} from "@/helper/ui-helper";
-import {getEventsByCategoryRegionAndYear} from "@/api/terralert-client";
 import {regionToBoundingBoxCoords, TerralertRegion} from "@/helper/terralert-region-helper";
 import {MenuActions, MenuBar} from "@/components/menu-bar";
 import {useCategoryState} from "@/components/category-state-context";
@@ -65,9 +68,10 @@ export default function Terralert() {
     // History
     const [comparisonActive, setComparisonActive] = useState(false);
     const [historyTimeFrame, setHistoryTimeFrame] = useState<number[]>([]);
-    const [historyEventArrays, setHistoryEventArrays] = useState<TerralertEvent[][] | null>(null);
+    const [historyEventArrays, setHistoryEventArrays] = useState<TerralertEventListByYear[] | null>(null);
     const [historyMarkers, setHistoryMarkers] = useState<TerralertMapMarker[]>([]);
     const [historyPolylines, setHistoryPolylines] = useState<TerralertPolyLine[]>([]);
+    const [activeYears, setActiveYears] = useState<number[]>([])
 
     //Settings
 
@@ -235,11 +239,14 @@ export default function Terralert() {
     // loading markers/polylines for events
     useEffect( () => {
         if (eventData != null && !comparisonActive) {
+
             setLoading({status: "loading", message: "EVENTS"})
             setMarkers(getMarkersForEvents(eventData))
+
             let eventPolyLines: TerralertPolyLine[] = [];
+
             eventData.forEach(event => {
-                const poly = getPolylineForEventWithColor(event, 6);
+                const poly = getPolylineForEventWithColor(event, 2022);
                 if(poly) {
                     eventPolyLines.push(poly);
                 }
@@ -249,6 +256,11 @@ export default function Terralert() {
             //setLoading({status: "error", message: "test test test test test test test test test test test test test test test test test test"})
         }
     }, [eventData, comparisonActive])
+
+    // set timeframe for later usage
+    useEffect(() => {
+        setActiveYears(historyTimeFrame);
+    }, [historyTimeFrame]);
 
     // loading events for comparison
     useEffect(() => {
@@ -263,22 +275,27 @@ export default function Terralert() {
 
 
                 let categoryId = parseCategoryStateToDbId(category);
-                let eventArrays: TerralertEvent[][] = []
+                let eventArraysByYear: TerralertEventListByYear[] = []
 
-                for (const year of historyTimeFrame) {
-                    let regionYearSynced = await isRegionYearSynced(region!, year, categoryId);
-
-                    if (!regionYearSynced) {
-                        console.log("syncing region and year: " + region!.name + " " + year)
-                        await syncRegionYear(region!, year, category);
+                for (const yearFromTimeframe of activeYears) {
+                    let eventsByYear: TerralertEventListByYear = {
+                        year: yearFromTimeframe,
+                        events: []
                     }
 
-                    const eventsForYear = await getEventsForRegionYearCategory(region!, year, categoryId);
-                    eventArrays.push(eventsForYear);
+                    let regionYearSynced = await isRegionYearSynced(region!, yearFromTimeframe, categoryId);
+
+                    if (!regionYearSynced) {
+                        console.log("syncing region and year: " + region!.name + " " + yearFromTimeframe)
+                        await syncRegionYear(region!, yearFromTimeframe, category);
+                    }
+
+                    eventsByYear.events = await getEventsForRegionYearCategory(region!, yearFromTimeframe, categoryId)
+                    eventArraysByYear.push(eventsByYear);
                 }
 
                 if (!cancelled) {
-                    setHistoryEventArrays(eventArrays);
+                    setHistoryEventArrays(eventArraysByYear);
                 }
             } catch (e) {
                 if (!cancelled) {
@@ -296,24 +313,29 @@ export default function Terralert() {
         return () => {
             cancelled = true;
         };
-    }, [historyTimeFrame, comparisonActive, category, region]);
+    }, [historyTimeFrame, comparisonActive, category, region, activeYears]);
 
     // loading markers/polylines for comparison
     useEffect(() => {
         if(historyEventArrays != null && comparisonActive) {
+
             let historyMarkers: TerralertMapMarker[] = [];
             let historyPolylines: TerralertPolyLine[] = [];
+
             historyEventArrays.forEach((eventArray, index) => {
-                let markers = getMarkersForHistoryEvents(eventArray, index);
+
+                let markers = getMarkersForHistoryEvents(eventArray.events, eventArray.year);
                 historyMarkers.push(...markers);
 
-                eventArray.forEach(event => {
-                    const poly = getPolylineForEventWithColor(event, index);
+                eventArray.events.forEach(event => {
+                    const poly = getPolylineForEventWithColor(event, eventArray.year);
+
                     if (poly) {
                         historyPolylines.push(poly);
                     }
                 });
             });
+
             setHistoryMarkers(historyMarkers);
             setHistoryPolylines(historyPolylines);
         }
@@ -556,7 +578,7 @@ export default function Terralert() {
                         backgroundColor: colors.background,
                         borderColor: colors.border
                     }]}>
-                    <HistoryLegend years={historyTimeFrame}/>
+                    <HistoryLegend years={historyTimeFrame} activeYears={activeYears} setActiveYears={setActiveYears}/>
                 </ThemedView>
                 <ThemedView style={[
                     styles.optionsContainer,

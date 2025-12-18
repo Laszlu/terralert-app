@@ -1,12 +1,15 @@
-import {StyleSheet, View} from "react-native";
+import {Button, StyleSheet, TouchableOpacity, View} from "react-native";
 import {IconComponent} from "@/components/icon-component";
 import {pinColors} from "@/constants/constants";
 import {ThemedText} from "@/components/themed-text";
 import {useMyTheme} from "@/hooks/useCustomTheme";
 import {useResponsiveScaling} from "@/hooks/use-responsive-scaling";
+import React from "react";
 
 export type HistoryLegendProps = {
     years: number[];
+    activeYears: number[];
+    setActiveYears:  React.Dispatch<React.SetStateAction<number[]>>;
 }
 
 export function HistoryLegend(props: HistoryLegendProps) {
@@ -25,20 +28,41 @@ export function HistoryLegend(props: HistoryLegendProps) {
                 {props.years.map((year, index) => (
                     <View
                         key={index}
-                        style={[
-                            styles.historyLegendLineView,
-                            {
-                                marginHorizontal: responsiveScaling.scale(5),
-                            }]}>
-                        <IconComponent library={"MaterialCommunityIcons"} name={"rectangle"} size={30} color={pinColors[index]}/>
-                        <ThemedText style={[
-                            styles.historyLegendText,
-                            {
-                                fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
-                            }
-                        ]}>
-                            {year}
-                        </ThemedText>
+                    >
+                        <TouchableOpacity
+                            style={[
+                                styles.historyLegendLineView,
+                                {
+                                    marginHorizontal: responsiveScaling.scale(10),
+                                    marginVertical: responsiveScaling.scale(5),
+                                    width: responsiveScaling.scale(80),
+                                    borderColor: colors.border
+                                }]}
+                            onPress={() => {
+                                props.setActiveYears(prev =>
+                                    prev.includes(year)
+                                        ? prev.filter(y => y !== year)
+                                        : [...prev, year].sort((a, b) => a - b)
+                                );
+                            }}
+                        >
+                            <IconComponent
+                                library={"MaterialCommunityIcons"}
+                                name={"rectangle"}
+                                size={30}
+                                color={props.activeYears.includes(year) ?
+                                    pinColors.find(c => c.year === year)!.color :
+                                    pinColors.find(c => c.year === 0)!.color}
+                            />
+                            <ThemedText style={[
+                                styles.historyLegendText,
+                                {
+                                    fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                                }
+                            ]}>
+                                {year}
+                            </ThemedText>
+                        </TouchableOpacity>
                     </View>
                 ))}
             </View>
@@ -59,6 +83,8 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
+        borderRadius: 10,
+        borderWidth: 0.5
     },
 
     historyLegendText: {

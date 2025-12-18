@@ -12,6 +12,11 @@ export class TerralertEventListResult {
     }
 }
 
+export type TerralertEventListByYear = {
+    year: number;
+    events: TerralertEvent[];
+}
+
 export class TerralertEvent {
     id: string | null;
     title: string | null;
