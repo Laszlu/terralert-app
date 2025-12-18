@@ -33,6 +33,7 @@ import {getCurrentLocation, TerralertLocation} from "@/hooks/use-geolocation";
 import {getEventsByCategory, getEventsForRegionYearCategory, isRegionYearSynced} from "@/repositories/event-repository";
 import {useStartupSync} from "@/components/startup-sync-provider";
 import {syncRegionYear} from "@/services/event-sync-service";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Terralert() {
     //-------------------
@@ -141,6 +142,23 @@ export default function Terralert() {
     //-------
     const parsedEvent: TerralertEvent = parseTerralertEvent(testEvent);
     const marker = geometryToMarkers(parsedEvent.geometry);
+
+    //-------------------
+    // DEBUG
+    //-------
+    async function debugAsyncStorage() {
+        const keys = await AsyncStorage.getAllKeys();
+        console.log('AsyncStorage keys:', keys);
+
+        const entries = await AsyncStorage.multiGet(keys);
+        console.log('AsyncStorage entries:', entries);
+    }
+
+    useEffect(() => {
+        if (__DEV__) {
+            debugAsyncStorage()
+        }
+    }, []);
 
     //-------------------
     // Map View Control
