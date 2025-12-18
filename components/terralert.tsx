@@ -184,15 +184,8 @@ export default function Terralert() {
     //-------
     // online status
     useEffect(() => {
-        let onlineStatus = ""
-        if (isOnline) {
-            onlineStatus = "ONLINE"
-            setOnlineSyncStatus(onlineStatus)
-        } else {
-            onlineStatus = `OFFLINE`
-            setOnlineSyncStatus(onlineStatus)
-        }
-    }, [isOnline, lastSync]);
+        setOnlineSyncStatus(isOnline ? "ONLINE" : "OFFLINE");
+    }, [isOnline]);
 
     // loading location
     useEffect(() => {
