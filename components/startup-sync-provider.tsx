@@ -1,8 +1,7 @@
-import React, {createContext, useContext, useEffect, useState} from 'react';
+import React, {createContext, useCallback, useContext, useEffect, useRef, useState} from 'react';
 import * as Network from 'expo-network';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {syncEventsFromBackend} from "@/services/event-sync-service";
-import {useCategoryState} from "@/components/category-state-context";
 import {getRegionsForCategory} from "@/helper/terralert-region-helper";
 
 interface StartupSyncContextType {
@@ -40,54 +39,60 @@ export function StartupSyncProvider({ children }: { children: React.ReactNode })
     const [ready, setReady] = useState(false);
     const [isOnline, setIsOnline] = useState(false);
     const [lastSync, setLastSync] = useState<Date | null>(null);
-    const {category} = useCategoryState();
+
+    const syncInProgressRef = useRef(false);
 
     useEffect(() => {
-        let cancelled = false;
 
-        async function bootstrap() {
+        const trySyncIfNeeded = async () => {
+            if (syncInProgressRef.current) return;
+
+            const netState = await Network.getNetworkStateAsync();
+            const online = netState.isConnected && netState.isInternetReachable !== false;
+
+            const lastSyncStr = await AsyncStorage.getItem(SYNC_KEY);
+            if (lastSyncStr) setLastSync(new Date(lastSyncStr));
+
+            if (!online) return;
+
+            const needSync = await shouldSync();
+            if (!needSync) return;
+
             try {
-                const netState = await Network.getNetworkStateAsync();
-                setIsOnline((netState.isConnected && netState.isInternetReachable !== false) ?? false);
+                syncInProgressRef.current = true;
 
-                if (netState.isConnected && netState.isInternetReachable) {
-                    const needSync = await shouldSync();
-                    if (needSync) {
-                        await syncEventsFromBackend(category);
-                        await syncEventsFromBackend({
-                            category: "vo",
-                            regions: getRegionsForCategory("vo")
-                        })
-                        await syncEventsFromBackend({
-                            category: "ea",
-                            regions: getRegionsForCategory("ea")
-                        })
-                        const now = new Date();
-                        setLastSync(now);
-                        await AsyncStorage.setItem(SYNC_KEY, now.toISOString());
-                    } else {
-                        const lastSyncStr = await AsyncStorage.getItem(SYNC_KEY);
-                        if (lastSyncStr) setLastSync(new Date(lastSyncStr));
-                    }
-                }
+                await syncEventsFromBackend({ category: "st", regions: getRegionsForCategory("st") });
+                await syncEventsFromBackend({ category: "vo", regions: getRegionsForCategory("vo") });
+                await syncEventsFromBackend({ category: "ea", regions: getRegionsForCategory("ea") });
+
+                const now = new Date();
+                await AsyncStorage.setItem(SYNC_KEY, now.toISOString());
+                setLastSync(now);
             } catch (e) {
-                console.warn('Startup sync failed', e);
+                console.warn("Sync failed", e);
             } finally {
-                if (!cancelled) setReady(true);
+                syncInProgressRef.current = false;
             }
-        }
+        };
 
-        bootstrap();
-
-        const subscription = Network.addNetworkStateListener(state => {
+        Network.getNetworkStateAsync().then(state => {
             setIsOnline((state.isConnected && state.isInternetReachable !== false) ?? false);
+            trySyncIfNeeded();
+            setReady(true);
         });
 
-        return () => {
-            cancelled = true;
-            subscription?.remove();
-        };
-    }, [category]);
+        const subscription = Network.addNetworkStateListener(state => {
+            const online = state.isConnected && state.isInternetReachable !== false;
+            setIsOnline(online!);
+
+            if (online) {
+                setTimeout(() => trySyncIfNeeded(), 1000);
+            }
+        });
+
+        return () => subscription?.remove();
+    }, []);
+
 
     if (!ready) return null;
 
@@ -97,3 +102,4 @@ export function StartupSyncProvider({ children }: { children: React.ReactNode })
         </StartupSyncContext.Provider>
     );
 }
+

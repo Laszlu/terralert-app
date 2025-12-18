@@ -47,6 +47,7 @@ export default function Terralert() {
     //-------
     // General app states
     const { isOnline, lastSync } = useStartupSync();
+    const [onlineSyncStatus, setOnlineSyncStatus] = useState<string>("");
     const [loading, setLoading] = useState<LoadingState>({
         status: 'idle',
     });
@@ -181,6 +182,18 @@ export default function Terralert() {
     //-------------------
     // Use Effects
     //-------
+    // online status
+    useEffect(() => {
+        let onlineStatus = ""
+        if (isOnline) {
+            onlineStatus = "ONLINE - LAST SYNC TODAY"
+            setOnlineSyncStatus(onlineStatus)
+        } else {
+            onlineStatus = `OFFLINE - LAST SYNC ${lastSync!.toLocaleDateString()}`
+            setOnlineSyncStatus(onlineStatus)
+        }
+    }, [isOnline, lastSync]);
+
     // loading location
     useEffect(() => {
         async function loadLocation() {
@@ -416,6 +429,17 @@ export default function Terralert() {
                             fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 16 : 13),
                         }]}>
                         {"REGION: " + (region !== null ? region.description.toUpperCase() : "NONE")}
+                    </ThemedText>
+                    <ThemedText style={[
+                        styles.statusBarText,
+                        {
+                            color: colors.notification,
+                            marginHorizontal: responsiveScaling.scale(5),
+                            fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 16 : 13),
+                        }
+                    ]}
+                    >
+                        {onlineSyncStatus}
                     </ThemedText>
                 </ThemedView>
                 {comparisonActive &&
