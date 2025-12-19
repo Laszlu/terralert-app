@@ -8,6 +8,18 @@ const baseUri =
     'https://terralertapi-3avna.ondigitalocean.app';
 const eventUri = '/api/events/';
 const currentUri = '/current';
+const connectionUri = '/api/connection';
+const versionUri = '/version';
+
+export async function getApiVersion() {
+    const response = await fetch(baseUri + connectionUri + versionUri);
+
+    if (!response.ok) {
+        throw new Error("API not reachable for version check");
+    }
+
+    return await response.text()
+}
 
 export async function getCurrentEvents(categoryState: CategoryState): Promise<TerralertEvent[]> {
     const response = await fetch(baseUri + eventUri + categoryState.category + currentUri);
