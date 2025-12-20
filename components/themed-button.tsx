@@ -26,7 +26,7 @@ export function ThemedButton({title, iconName, iconLibrary, onPress, disabled = 
                        styles.button,
                        {
                            backgroundColor: (selected ? colors.text : colors.background),
-                           paddingHorizontal: responsiveScaling.scale(2),
+                           paddingHorizontal: responsiveScaling.scale(3),
                            paddingVertical: responsiveScaling.scale(2),
                        }]}
                    disabled={disabled}>

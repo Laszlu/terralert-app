@@ -59,8 +59,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         width: '100%',
-        borderTopWidth: 1,
-        borderBottomWidth: 0.5,
     },
 
     settingsMenuText: {

@@ -138,6 +138,12 @@ export default function Terralert() {
         },
     };
 
+    const endComparison = () => {
+        setComparisonActive(false);
+        onRegionChange(null);
+        toggleHistoryMenuVisibility(false);
+    }
+
     //-------------------
     // Test Data
     //-------
@@ -409,7 +415,6 @@ export default function Terralert() {
                         {
                             backgroundColor: colors.background,
                             borderColor: colors.border,
-                            borderBottomWidth: (comparisonActive ? 0 : 1),
                             paddingBottom: responsiveScaling.scale(2),
                             paddingHorizontal: responsiveScaling.scale(5),
                         }]}
@@ -435,33 +440,6 @@ export default function Terralert() {
                         {onlineSyncStatus}
                     </ThemedText>
                 </ThemedView>
-                {comparisonActive &&
-                    <ThemedView style={[
-                        styles.comparisonInfo,
-                        {
-                            backgroundColor: colors.background,
-                            borderColor: colors.border,
-                            paddingVertical: responsiveScaling.scale(2),
-                            paddingHorizontal: responsiveScaling.scale(5),
-                        }]}>
-                        <TouchableOpacity onPress={() => {
-                            setComparisonActive(false);
-                            onRegionChange(null);
-                            toggleHistoryMenuVisibility(false);
-                        }}>
-                            <ThemedText style={[
-                                styles.statusBarText,
-                                {
-                                    color: colors.notification,
-                                    fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
-                                    marginHorizontal: responsiveScaling.scale(5),
-                                }]}>
-                                TAP HERE TO END COMPARISON
-                            </ThemedText>
-                        </TouchableOpacity>
-                    </ThemedView>
-
-                }
             </ThemedView>
 
             <ThemedView style={styles.mapContainer}>
@@ -641,9 +619,11 @@ export default function Terralert() {
                         region={region}
                         setRegion={setRegion}
                         regions={category.regions}
+                        comparisonActive={comparisonActive}
                         setComparisonActive={setComparisonActive}
                         setHistoryTimeFrame={setHistoryTimeFrame}
                         toggleHistoryMenuVisibility={toggleHistoryMenuVisibility}
+                        endComparison={endComparison}
                     />
                 </ThemedView>
                 <MenuBar
@@ -701,8 +681,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        borderBottomWidth: 1,
-        borderTopWidth: 0.2,
         height: 'auto'
     },
 
@@ -721,7 +699,6 @@ const styles = StyleSheet.create({
 
     loadingSpinnerContainer: {
         borderRadius: 10,
-        borderWidth: 0.5,
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
@@ -741,7 +718,6 @@ const styles = StyleSheet.create({
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        borderBottomWidth: 0.2,
     },
 
     optionsContainer: {
@@ -761,6 +737,5 @@ const styles = StyleSheet.create({
         left: 0,
         zIndex: 100,
         height: 'auto',
-        borderTopWidth: 1
     },
 });

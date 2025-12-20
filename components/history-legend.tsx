@@ -83,8 +83,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        borderRadius: 10,
-        borderWidth: 0.5
+        borderRadius: 10
     },
 
     historyLegendText: {

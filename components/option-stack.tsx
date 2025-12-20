@@ -41,7 +41,9 @@ export function OptionsStack(optionsStackProps: OptionsStackProps) {
                         width: "100%",
                         alignItems: "center",
                         justifyContent: "flex-start",
-                        flexDirection: 'row'
+                        flexDirection: 'row',
+                        paddingLeft: responsiveScaling.scale(60),
+                        paddingBottom: responsiveScaling.scale(5)
                 }}>
                     <IconComponent library={item.iconLibrary} name={item.iconPath} size={item.iconSize} color={item.iconColor}/>
                     <ThemedText style={{
@@ -63,8 +65,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         width: '100%',
-        borderTopWidth: 1,
-        borderBottomWidth: 0.5,
     }
 })
 

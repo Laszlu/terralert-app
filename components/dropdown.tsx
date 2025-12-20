@@ -35,8 +35,7 @@ export function Dropdown(props: DropdownProps) {
                 style={[
                     styles.button,
                     {
-                        backgroundColor: colors.background,
-                        borderColor: colors.border,
+                        backgroundColor: colors.text,
                         padding: responsiveScaling.scale(5),
                     },
                     props.disabled && {opacity: 0.5}
@@ -46,6 +45,7 @@ export function Dropdown(props: DropdownProps) {
                     styles.buttonText,
                     {
                         fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                        color: colors.background
                     }
                 ]}>
                     {selectedItem ? selectedItem.label : props.placeholder}
@@ -71,7 +71,6 @@ export function Dropdown(props: DropdownProps) {
                         styles.dropdown,
                         {
                             backgroundColor: colors.background,
-                            borderColor: colors.border,
                             paddingVertical: responsiveScaling.scale(8),
                             paddingHorizontal: responsiveScaling.scale(20),
                             width: responsiveScaling.scale(250),
@@ -83,7 +82,6 @@ export function Dropdown(props: DropdownProps) {
                                 <TouchableOpacity style={[
                                     styles.item,
                                     {
-                                        borderColor: colors.border,
                                         paddingVertical: responsiveScaling.scale(5),
                                         paddingHorizontal: responsiveScaling.scale(10),
                                         marginBottom: responsiveScaling.scale(5),
@@ -109,7 +107,6 @@ export function Dropdown(props: DropdownProps) {
 
 const styles = StyleSheet.create({
     button: {
-        borderWidth: 1,
         borderRadius: 8,
     },
     buttonText: {
@@ -124,7 +121,6 @@ const styles = StyleSheet.create({
     dropdown: {
         borderRadius: 8,
         height: "auto",
-        borderWidth: 0.5,
     },
     item: {
 

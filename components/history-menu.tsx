@@ -14,9 +14,11 @@ export type HistoryMenuProps = {
     regions: TerralertRegion[];
     region: TerralertRegion | null;
     setRegion: React.Dispatch<React.SetStateAction<TerralertRegion | null>>;
+    comparisonActive: boolean;
     setComparisonActive: React.Dispatch<React.SetStateAction<boolean>>;
     toggleHistoryMenuVisibility:  React.Dispatch<React.SetStateAction<boolean>>;
     setHistoryTimeFrame: React.Dispatch<React.SetStateAction<number[]>>;
+    endComparison: () => void;
 }
 
 export function HistoryMenu(props: HistoryMenuProps) {
@@ -97,12 +99,17 @@ export function HistoryMenu(props: HistoryMenuProps) {
         }
     }
 
+    const resetComparisonValues = () => {
+        setYearStart(yearZeroItem);
+        setYearEnd(yearZeroItem);
+        setHistoryRegion(null);
+    }
+
     return(
         <View style={[
             styles.historyMenuView,
             {
                 backgroundColor: colors.background,
-                borderColor: colors.border,
                 paddingVertical: responsiveScaling.scale(10),
             }]}>
             <View style={[
@@ -218,12 +225,32 @@ export function HistoryMenu(props: HistoryMenuProps) {
                 />
             </View>
             <View style={[
-                styles.historyMenuHeader,
+                styles.historyMenuButtonRow,
                 {
                     paddingVertical: responsiveScaling.scale(10)
                 }
             ]}>
-                <ThemedButton title={'START COMPARISON'} iconName={'history'} iconLibrary={"MaterialIcons"} onPress={() => {startComparison()}} disabled={false} selected={false}/>
+                <ThemedButton
+                    title={props.comparisonActive ? 'CHANGE COMPARISON' : 'START COMPARISON'}
+                    iconName={'history'}
+                    iconLibrary={"MaterialIcons"}
+                    onPress={() => {startComparison()}}
+                    disabled={false}
+                    selected={false}
+                />
+                {props.comparisonActive &&
+                    <ThemedButton
+                        title={'END COMPARISON'}
+                        iconName={'stop-circle-outline'}
+                        iconLibrary={"MaterialCommunityIcons"}
+                        onPress={() => {
+                            props.endComparison();
+                            resetComparisonValues();
+                        }}
+                        selected={false}
+                        disabled={false}
+                    />
+                }
             </View>
         </View>
     )
@@ -235,8 +262,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         width: '100%',
-        borderTopWidth: 1,
-        borderBottomWidth: 0.5,
     },
 
     historyMenuText: {
@@ -259,6 +284,13 @@ const styles = StyleSheet.create({
         alignItems: "center",
         width: '100%',
         justifyContent: 'flex-start',
+    },
+
+    historyMenuButtonRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        width: '100%',
+        justifyContent: 'space-around',
     }
 })
 
