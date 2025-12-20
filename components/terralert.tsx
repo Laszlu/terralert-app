@@ -394,7 +394,7 @@ export default function Terralert() {
                     <ThemedText style={[
                         styles.statusBarText,
                         {
-                            color: colors.notification,
+                            color: colors.text,
                             marginHorizontal: responsiveScaling.scale(5),
                             fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 16 : 13),
                         }]}>
@@ -403,7 +403,7 @@ export default function Terralert() {
                     <ThemedText style={[
                         styles.statusBarText,
                         {
-                            color: colors.notification,
+                            color: colors.text,
                             marginHorizontal: responsiveScaling.scale(5),
                             fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 16 : 13),
                         }]}>
@@ -422,7 +422,7 @@ export default function Terralert() {
                     <ThemedText style={[
                         styles.statusBarText,
                         {
-                            color: colors.notification,
+                            color: colors.text,
                             marginHorizontal: responsiveScaling.scale(5),
                             fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 16 : 13),
                         }]}>
@@ -431,7 +431,7 @@ export default function Terralert() {
                     <ThemedText style={[
                         styles.statusBarText,
                         {
-                            color: colors.notification,
+                            color: colors.text,
                             marginHorizontal: responsiveScaling.scale(5),
                             fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 16 : 13),
                         }
