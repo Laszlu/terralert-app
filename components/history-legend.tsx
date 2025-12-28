@@ -36,7 +36,8 @@ export function HistoryLegend(props: HistoryLegendProps) {
                                     marginHorizontal: responsiveScaling.scale(10),
                                     marginVertical: responsiveScaling.scale(5),
                                     width: responsiveScaling.scale(80),
-                                    borderColor: colors.border
+                                    borderColor: colors.border,
+                                    backgroundColor: colors.text
                                 }]}
                             onPress={() => {
                                 props.setActiveYears(prev =>
@@ -58,6 +59,7 @@ export function HistoryLegend(props: HistoryLegendProps) {
                                 styles.historyLegendText,
                                 {
                                     fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                                    color: colors.background
                                 }
                             ]}>
                                 {year}
@@ -83,7 +85,8 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        borderRadius: 10
+        borderRadius: 10,
+        borderWidth: 1
     },
 
     historyLegendText: {

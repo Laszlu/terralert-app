@@ -40,10 +40,37 @@ export function MenuBar({actions, disabled, categoryOpened, regionOpened, histor
                 paddingHorizontal: responsiveScaling.scale(25)
 
             }]}>
-            <ThemedButton title={"CATEGORY"} iconName={categoryIcon.iconName} iconLibrary={categoryIcon.iconLibrary} onPress={actions.changeCategory} disabled={disabled} selected={categoryOpened}></ThemedButton>
-            <ThemedButton title={"REGION"} iconName={"earth"} iconLibrary={"MaterialCommunityIcons"} onPress={actions.changeRegion} disabled={disabled} selected={regionOpened}></ThemedButton>
-            <ThemedButton title={"HISTORY"} iconName={"history"} iconLibrary={"MaterialIcons"} onPress={actions.openHistory}  disabled={category.category === "vo"} selected={historyOpened}></ThemedButton>
-            <ThemedButton title={"SETTINGS"} iconName={"settings"} iconLibrary={"MaterialIcons"} onPress={actions.openSettings} selected={settingsOpened}></ThemedButton>
+            <ThemedButton
+                title={"CATEGORY"}
+                iconName={categoryIcon.iconName}
+                iconLibrary={categoryIcon.iconLibrary}
+                onPress={actions.changeCategory}
+                disabled={disabled}
+                selected={categoryOpened}>
+            </ThemedButton>
+            <ThemedButton
+                title={"REGION"}
+                iconName={"earth"}
+                iconLibrary={"MaterialCommunityIcons"}
+                onPress={actions.changeRegion}
+                disabled={disabled}
+                selected={regionOpened}>
+            </ThemedButton>
+            <ThemedButton
+                title={"HISTORY"}
+                iconName={"history"}
+                iconLibrary={"MaterialIcons"}
+                onPress={actions.openHistory}
+                disabled={category.category === "vo"}
+                selected={historyOpened}>
+            </ThemedButton>
+            <ThemedButton
+                title={"SETTINGS"}
+                iconName={"settings"}
+                iconLibrary={"MaterialIcons"}
+                onPress={actions.openSettings}
+                selected={settingsOpened}>
+            </ThemedButton>
         </ThemedView>
     )
 }

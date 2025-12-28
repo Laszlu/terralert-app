@@ -63,12 +63,12 @@ export function StartupSyncProvider({ children }: { children: React.ReactNode })
             if (cancelled) return;
 
             try {
-                console.log("checking online state...");
+                //console.log("checking online state...");
                 await getApiVersion();
-                console.log("online: true");
+                //console.log("online: true");
                 if (!cancelled) setIsOnline(true);
             } catch (error) {
-                console.log("online: false");
+                //console.log("online: false");
                 if (!cancelled) setIsOnline(false);
             }
         };

@@ -24,7 +24,26 @@ export type HistoryMenuProps = {
 export function HistoryMenu(props: HistoryMenuProps) {
     const {colors} = useMyTheme();
     const responsiveScaling = useResponsiveScaling();
-    const {category} = useCategoryState();
+    const {category, setCategory} = useCategoryState();
+
+    console.log("init category: " + category.category)
+
+    const categoriesForComparison = ["st", "ea"];
+    let selectableCategories: DropdownItem[] = [];
+    categoriesForComparison.forEach( (category) =>{
+        let selectableCategory: DropdownItem = {label: parseCategoryToFullName(category).toUpperCase(), value: category};
+        selectableCategories.push(selectableCategory);
+        console.log(selectableCategory)
+    })
+
+    const handleCategorySelected = (selected: DropdownItem) => {
+        if (typeof selected.value == "string") {
+            console.log("Category selected: " + selected.value)
+            setCategory(selected.value)
+        } else {
+            console.log(typeof selected.value)
+        }
+    }
 
     const today = new Date();
     const currentYear = today.getFullYear();
@@ -125,7 +144,7 @@ export function HistoryMenu(props: HistoryMenuProps) {
                         marginHorizontal: responsiveScaling.scale(5),
                     }
                 ]}>
-                    Historical Comparison
+                    HISTORICAL COMPARISON
                 </ThemedText>
                 {!validComparison &&
                     <ThemedText style={[
@@ -153,15 +172,12 @@ export function HistoryMenu(props: HistoryMenuProps) {
                     }]}>
                     CATEGORY:
                 </ThemedText>
-                <ThemedText style={[
-                    styles.historyMenuText,
-                    {
-                        fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
-                        marginHorizontal: responsiveScaling.scale(5),
-                    }
-                ]}>
-                    {parseCategoryToFullName(category.category).toUpperCase()}
-                </ThemedText>
+                <Dropdown
+                    items={selectableCategories}
+                    onChange={(selectedCategoryItem) => {handleCategorySelected(selectedCategoryItem)}}
+                    value={category.category}
+                    placeholder={"CATEGORY"}
+                />
             </View>
             <View style={[
                 styles.historyMenuRow,
