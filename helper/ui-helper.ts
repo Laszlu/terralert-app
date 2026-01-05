@@ -14,6 +14,13 @@ export type IconInfo = {
     iconLibrary: IconLibraries,
 }
 
+export function parseDateFromMarker(date: string): string {
+    let datePortion = date.substring(0, 10);
+    let reorderedDate = `${datePortion.substring(8)}.${datePortion.substring(5, 7)}.${datePortion.substring(0, 4)}`;
+    let timePortion = date.substring(11, 19);
+    return reorderedDate + " " + timePortion
+}
+
 export function parseCategoryToFullName(category: string): string {
     switch (category) {
         case "st":

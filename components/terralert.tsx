@@ -1,7 +1,7 @@
 import 'react-native-reanimated';
 import {ThemedView} from "@/components/themed-view";
 import {ActivityIndicator, StyleSheet, TouchableOpacity} from "react-native";
-import MapView, {Marker, Polyline, PROVIDER_GOOGLE,} from "react-native-maps";
+import MapView, {Callout, Marker, Polyline, PROVIDER_GOOGLE,} from "react-native-maps";
 import {OptionItem, OptionsStack} from "@/components/option-stack";
 import {useEffect, useRef, useState} from "react";
 
@@ -34,6 +34,7 @@ import {getEventsByCategory, getEventsForRegionYearCategory, isRegionYearSynced}
 import {useStartupSync} from "@/components/startup-sync-provider";
 import {syncRegionYear} from "@/services/event-sync-service";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {CustomCallout} from "@/components/ui/custom-callout";
 
 export default function Terralert() {
     //-------------------
@@ -303,7 +304,6 @@ export default function Terralert() {
                 setLoading({status: "loading", message: "EVENTS"});
                 await new Promise(resolve => setTimeout(resolve, 0));
 
-
                 let categoryId = parseCategoryStateToDbId(category);
                 let eventArraysByYear: TerralertEventListByYear[] = []
 
@@ -557,6 +557,10 @@ export default function Terralert() {
                             {comparisonActive && m.icon && (
                                 <IconComponent library={m.icon.iconLibrary} name={m.icon.iconName} size={30} color={m.color}/>
                             )}
+
+                            <Callout tooltip={true}>
+                                <CustomCallout marker={m}/>
+                            </Callout>
                         </Marker>
                     ))}
                     {!comparisonActive && category.category === "st" && currentEventLines.map((poly, index) => (

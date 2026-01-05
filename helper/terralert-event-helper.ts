@@ -16,6 +16,8 @@ export type TerralertMapMarker = {
     title?: string;
     description?: string;
     magnitudeValue?: number | null;
+    magnitudeUnit?: string | null;
+    event?: TerralertEvent | null;
     date?: string | null;
     image?: number | ImageURISource | undefined;
     color?: string;
@@ -180,7 +182,9 @@ export function getMarkerForEvent(event: TerralertEvent): TerralertMapMarker | n
                 latitude: lat,
                 longitude: lon,
                 magnitudeValue: currentGeometry.magnitudeValue ?? null,
+                magnitudeUnit: currentGeometry.magnitudeUnit ?? null,
                 date: currentGeometry.date ?? null,
+                event: event,
                 title: `${event.title ?? "Event"}`,
                 description: ` ${currentGeometry.date ?? ""} ${currentGeometry.magnitudeValue != null ? "- " + currentGeometry.magnitudeValue : ""}${currentGeometry.magnitudeUnit ?? ""}`,
                 icon: getIconPathForCategory(event.categories[0].id as string),
@@ -220,7 +224,9 @@ export function getMarkerForHistoryEvent(event: TerralertEvent, year: number): T
                 latitude: lat,
                 longitude: lon,
                 magnitudeValue: currentGeometry.magnitudeValue ?? null,
+                magnitudeUnit: currentGeometry.magnitudeUnit ?? null,
                 date: currentGeometry.date ?? null,
+                event: event,
                 title: `${event.title ?? "Event"}`,
                 description: ` ${currentGeometry.date ?? ""} ${currentGeometry.magnitudeValue != null ? "- " + currentGeometry.magnitudeValue : ""}${currentGeometry.magnitudeUnit ?? ""}`,
                 color: pinColors.find(c => c.year === year)!.color,
