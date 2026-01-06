@@ -5,6 +5,7 @@ import {useResponsiveScaling} from "@/hooks/use-responsive-scaling";
 import {ThemedText} from "@/components/themed-text";
 import {TerralertMapMarker} from "@/helper/terralert-event-helper";
 import {parseDateFromMarker} from "@/helper/ui-helper";
+import {IconComponent} from "@/components/icon-component";
 
 type CustomCalloutProps = {
     marker: TerralertMapMarker;
@@ -24,25 +25,43 @@ export function CustomCallout(calloutProps: CustomCalloutProps) {
                 minWidth: responsiveScaling.scale(200),
                 minHeight: responsiveScaling.scale(80),
                 paddingVertical: responsiveScaling.scale(10),
-                paddingHorizontal: responsiveScaling.scale(20)
+                paddingLeft: responsiveScaling.scale(20)
         }]}>
-            <ThemedText style={[
-                styles.CustomCalloutHeader,
+            <ThemedView
+            style={[
                 {
-                    fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16)
+                    width: '80%',
                 }
             ]}>
-                {calloutProps.marker.title}
-            </ThemedText>
-            <ThemedText>
-                DATE: {parsedDateTime !== null ? parsedDateTime.substring(0, 10) : ""}
-            </ThemedText>
-            <ThemedText>
-                TIME: {parsedDateTime !== null ? parsedDateTime.substring(11) : ""}
-            </ThemedText>
-            <ThemedText>
-                MAGNITUDE: {calloutProps.marker.magnitudeValue} {calloutProps.marker.magnitudeUnit}
-            </ThemedText>
+                <ThemedText style={[
+                    styles.CustomCalloutHeader,
+                    {
+                        fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16)
+                    }
+                ]}>
+                    {calloutProps.marker.title}
+                </ThemedText>
+                <ThemedText>
+                    DATE: {parsedDateTime !== null ? parsedDateTime.substring(0, 10) : ""}
+                </ThemedText>
+                <ThemedText>
+                    TIME: {parsedDateTime !== null ? parsedDateTime.substring(11) : ""}
+                </ThemedText>
+                <ThemedText>
+                    MAGNITUDE: {calloutProps.marker.magnitudeValue} {calloutProps.marker.magnitudeUnit}
+                </ThemedText>
+            </ThemedView>
+            <ThemedView style={[
+                {
+                    width: '20%',
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }
+            ]}>
+                <IconComponent library={"MaterialIcons"} name={'arrow-forward-ios'} color={colors.text} size={30}/>
+            </ThemedView>
         </ThemedView>
     )
 }
@@ -50,6 +69,7 @@ export function CustomCallout(calloutProps: CustomCalloutProps) {
 const styles = StyleSheet.create({
     CustomCalloutContainer: {
         borderRadius: 10,
+        flexDirection: "row"
     },
 
     CustomCalloutHeader: {

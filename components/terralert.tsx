@@ -67,6 +67,7 @@ export default function Terralert() {
     const [eventData, setEventData] = useState<TerralertEvent[] | null>(null);
     const [markers, setMarkers] = useState<TerralertMapMarker[]>([]);
     const [currentEventLines, setCurrentEventLines] = useState<TerralertPolyLine[]>([]);
+    const [selectedEvent, setSelectedEvent] = useState<TerralertEvent | null>(null);
 
     // History
     const [comparisonActive, setComparisonActive] = useState(false);
@@ -184,6 +185,11 @@ export default function Terralert() {
         toggleHistoryMenuVisibility(false);
         toggleSettingsMenuVisibility(false);
         toggleCategoryMenuVisibility(false);
+    }
+
+    const handleMarkerPressed = (marker: TerralertMapMarker) => {
+        setSelectedEvent(marker.event!);
+
     }
 
     //-------------------
@@ -558,7 +564,7 @@ export default function Terralert() {
                                 <IconComponent library={m.icon.iconLibrary} name={m.icon.iconName} size={30} color={m.color}/>
                             )}
 
-                            <Callout tooltip={true}>
+                            <Callout tooltip={true} onPress={() => {handleMarkerPressed(m)}}>
                                 <CustomCallout marker={m}/>
                             </Callout>
                         </Marker>
