@@ -15,7 +15,6 @@ export function CustomCallout(calloutProps: CustomCalloutProps) {
     const {colors} = useMyTheme();
     const responsiveScaling = useResponsiveScaling();
 
-    const parsedDateTime = calloutProps.marker.date !== null ? parseDateFromMarker(calloutProps.marker.date!) : null;
 
     return(
         <ThemedView style={[
@@ -23,7 +22,7 @@ export function CustomCallout(calloutProps: CustomCalloutProps) {
             {
                 backgroundColor: colors.background,
                 minWidth: responsiveScaling.scale(200),
-                minHeight: responsiveScaling.scale(80),
+                minHeight: responsiveScaling.scale(50),
                 paddingVertical: responsiveScaling.scale(10),
                 paddingLeft: responsiveScaling.scale(20)
         }]}>
@@ -39,16 +38,7 @@ export function CustomCallout(calloutProps: CustomCalloutProps) {
                         fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16)
                     }
                 ]}>
-                    {calloutProps.marker.title}
-                </ThemedText>
-                <ThemedText>
-                    DATE: {parsedDateTime !== null ? parsedDateTime.substring(0, 10) : ""}
-                </ThemedText>
-                <ThemedText>
-                    TIME: {parsedDateTime !== null ? parsedDateTime.substring(11) : ""}
-                </ThemedText>
-                <ThemedText>
-                    MAGNITUDE: {calloutProps.marker.magnitudeValue} {calloutProps.marker.magnitudeUnit}
+                    {calloutProps.marker.title!.toUpperCase()}
                 </ThemedText>
             </ThemedView>
             <ThemedView style={[

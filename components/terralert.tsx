@@ -35,6 +35,7 @@ import {useStartupSync} from "@/components/startup-sync-provider";
 import {syncRegionYear} from "@/services/event-sync-service";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {CustomCallout} from "@/components/ui/custom-callout";
+import {EventDetailView} from "@/components/ui/event-detail-view";
 
 export default function Terralert() {
     //-------------------
@@ -60,6 +61,7 @@ export default function Terralert() {
     const [regionMenuVisibility, toggleRegionMenuVisibility] = useState(false);
     const [historyMenuVisibility, toggleHistoryMenuVisibility] = useState(false);
     const [settingsMenuVisibility, toggleSettingsMenuVisibility] = useState(false);
+    const [detailViewVisibility, toggleDetailViewVisibility] = useState(false);
 
     // Category, Region, EventData & Markers
     const {category, setCategory} = useCategoryState();
@@ -67,7 +69,7 @@ export default function Terralert() {
     const [eventData, setEventData] = useState<TerralertEvent[] | null>(null);
     const [markers, setMarkers] = useState<TerralertMapMarker[]>([]);
     const [currentEventLines, setCurrentEventLines] = useState<TerralertPolyLine[]>([]);
-    const [selectedEvent, setSelectedEvent] = useState<TerralertEvent | null>(null);
+    const [selectedMarker, setSelectedMarker] = useState<TerralertMapMarker | null>(null);
 
     // History
     const [comparisonActive, setComparisonActive] = useState(false);
@@ -118,24 +120,28 @@ export default function Terralert() {
             toggleRegionMenuVisibility(false);
             toggleHistoryMenuVisibility(false);
             toggleSettingsMenuVisibility(false);
+            toggleDetailViewVisibility(false);
             toggleCategoryMenuVisibility(v => !v);
         },
         changeRegion: () => {
             toggleCategoryMenuVisibility(false);
             toggleHistoryMenuVisibility(false);
             toggleSettingsMenuVisibility(false);
+            toggleDetailViewVisibility(false);
             toggleRegionMenuVisibility(v => !v);
         },
         openHistory: () => {
             toggleCategoryMenuVisibility(false);
             toggleRegionMenuVisibility(false);
             toggleSettingsMenuVisibility(false);
+            toggleDetailViewVisibility(false);
             toggleHistoryMenuVisibility(v => !v);
         },
         openSettings: () => {
             toggleCategoryMenuVisibility(false);
             toggleRegionMenuVisibility(false);
             toggleHistoryMenuVisibility(false);
+            toggleDetailViewVisibility(false);
             toggleSettingsMenuVisibility(v => !v);
         },
     };
@@ -188,8 +194,9 @@ export default function Terralert() {
     }
 
     const handleMarkerPressed = (marker: TerralertMapMarker) => {
-        setSelectedEvent(marker.event!);
-
+        setSelectedMarker(marker);
+        toggleDetailViewVisibility(true);
+        console.log(detailViewVisibility)
     }
 
     //-------------------
@@ -543,7 +550,13 @@ export default function Terralert() {
                             onRegionChange(null)
                         }
                     }}
-                    onPress={closeAllMenus}
+                    onPress={() =>{
+                        if(detailViewVisibility) {
+                            toggleDetailViewVisibility(false);
+                            return;
+                        }
+                        closeAllMenus()
+                    }}
                 >
                     {location &&
                         <Marker coordinate={{ latitude: location.latitude, longitude: location.longitude}}>
@@ -564,7 +577,9 @@ export default function Terralert() {
                                 <IconComponent library={m.icon.iconLibrary} name={m.icon.iconName} size={30} color={m.color}/>
                             )}
 
-                            <Callout tooltip={true} onPress={() => {handleMarkerPressed(m)}}>
+                            <Callout tooltip={true} onPress={() => {
+                                handleMarkerPressed(m);
+                            }}>
                                 <CustomCallout marker={m}/>
                             </Callout>
                         </Marker>
@@ -635,6 +650,14 @@ export default function Terralert() {
                         toggleHistoryMenuVisibility={toggleHistoryMenuVisibility}
                         endComparison={endComparison}
                     />
+                </ThemedView>
+                <ThemedView style={[
+                    styles.optionsContainer,
+                    detailViewVisibility ? styles.display_true : styles.display_false
+                ]}>
+                    {selectedMarker &&
+                        <EventDetailView marker={selectedMarker} />
+                    }
                 </ThemedView>
                 <MenuBar
                     actions={actions}
