@@ -1,5 +1,5 @@
 import React from 'react';
-import {Pressable, StyleSheet} from 'react-native';
+import {Platform, Pressable, StyleSheet} from 'react-native';
 import {ThemedText} from './themed-text';
 import {IconLibraries, IconName} from "@/helper/ui-helper";
 import {IconComponent} from "@/components/icon-component";
@@ -22,12 +22,15 @@ export function ThemedButton({title, iconName, iconLibrary, onPress, disabled = 
 
     return (
         <Pressable onPress={() => {onPress()}}
-                   style={[
+                   android_ripple={{ color: colors.card }}
+                   style={({pressed}) => [
                        styles.button,
                        {
                            backgroundColor: (selected ? colors.text : colors.background),
                            paddingHorizontal: responsiveScaling.scale(3),
-                           paddingVertical: responsiveScaling.scale(2),
+                           paddingVertical: responsiveScaling.scale(3),
+                           transform: [{ scale: pressed ? 0.96 : 1 }],
+                           opacity: pressed && Platform.OS === 'ios' ? 0.7 : 1,
                        }]}
                    disabled={disabled}>
             <IconComponent name={iconName as any} library={iconLibrary} size={30} color={disabled ? colors.disabled : (selected ? colors.background : colors.text)}/>

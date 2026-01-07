@@ -1,11 +1,12 @@
 import {ThemedView} from "@/components/themed-view";
-import {StyleSheet} from "react-native";
+import {Pressable, StyleSheet} from "react-native";
 import {useMyTheme} from "@/hooks/useCustomTheme";
 import {useResponsiveScaling} from "@/hooks/use-responsive-scaling";
 import {ThemedText} from "@/components/themed-text";
 import {TerralertMapMarker} from "@/helper/terralert-event-helper";
 import {parseDateFromMarker} from "@/helper/ui-helper";
 import {IconComponent} from "@/components/icon-component";
+import {useAnimatedStyle, useSharedValue} from "react-native-reanimated";
 
 type CustomCalloutProps = {
     marker: TerralertMapMarker;
@@ -15,7 +16,6 @@ export function CustomCallout(calloutProps: CustomCalloutProps) {
     const {colors} = useMyTheme();
     const responsiveScaling = useResponsiveScaling();
 
-
     return(
         <ThemedView style={[
             styles.CustomCalloutContainer,
@@ -24,7 +24,7 @@ export function CustomCallout(calloutProps: CustomCalloutProps) {
                 minWidth: responsiveScaling.scale(200),
                 minHeight: responsiveScaling.scale(50),
                 paddingVertical: responsiveScaling.scale(10),
-                paddingLeft: responsiveScaling.scale(20)
+                paddingLeft: responsiveScaling.scale(20),
         }]}>
             <ThemedView
             style={[
