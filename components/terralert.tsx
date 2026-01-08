@@ -1,6 +1,6 @@
 import 'react-native-reanimated';
 import {ThemedView} from "@/components/themed-view";
-import {ActivityIndicator, StyleSheet, TouchableOpacity} from "react-native";
+import {ActivityIndicator, Platform, Pressable, StyleSheet, TouchableOpacity} from "react-native";
 import MapView, {Callout, Marker, Polyline, PROVIDER_GOOGLE,} from "react-native-maps";
 import {OptionItem, OptionsStack} from "@/components/option-stack";
 import {useEffect, useRef, useState} from "react";
@@ -36,6 +36,8 @@ import {syncRegionYear} from "@/services/event-sync-service";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {CustomCallout} from "@/components/ui/custom-callout";
 import {EventDetailView} from "@/components/ui/event-detail-view";
+import {ThemedButton} from "@/components/themed-button";
+import {HelpView} from "@/components/help-view";
 
 export default function Terralert() {
     //-------------------
@@ -55,6 +57,7 @@ export default function Terralert() {
     });
     //const {location, locationError, locationLoading} = useGeolocation(); // continuous tracking hook
     const [location, setLocation] = useState<TerralertLocation | null>(null);
+    const [helpOpen, setHelpOpen] = useState(false);
 
     // Menus
     const [categoryMenuVisibility, toggleCategoryMenuVisibility] = useState(false);
@@ -121,6 +124,7 @@ export default function Terralert() {
             toggleHistoryMenuVisibility(false);
             toggleSettingsMenuVisibility(false);
             toggleDetailViewVisibility(false);
+            setHelpOpen(false);
             toggleCategoryMenuVisibility(v => !v);
         },
         changeRegion: () => {
@@ -128,6 +132,7 @@ export default function Terralert() {
             toggleHistoryMenuVisibility(false);
             toggleSettingsMenuVisibility(false);
             toggleDetailViewVisibility(false);
+            setHelpOpen(false);
             toggleRegionMenuVisibility(v => !v);
         },
         openHistory: () => {
@@ -135,6 +140,7 @@ export default function Terralert() {
             toggleRegionMenuVisibility(false);
             toggleSettingsMenuVisibility(false);
             toggleDetailViewVisibility(false);
+            setHelpOpen(false);
             toggleHistoryMenuVisibility(v => !v);
         },
         openSettings: () => {
@@ -142,6 +148,7 @@ export default function Terralert() {
             toggleRegionMenuVisibility(false);
             toggleHistoryMenuVisibility(false);
             toggleDetailViewVisibility(false);
+            setHelpOpen(false);
             toggleSettingsMenuVisibility(v => !v);
         },
     };
@@ -150,6 +157,11 @@ export default function Terralert() {
         setComparisonActive(false);
         onRegionChange(null);
         toggleHistoryMenuVisibility(false);
+    }
+
+    const handleHelpPressed = () => {
+        closeAllMenus();
+        setHelpOpen(v => !v);
     }
 
     //-------------------
@@ -277,7 +289,7 @@ export default function Terralert() {
         return () => {
             cancelled = true;
         };
-    }, [category, comparisonActive]);
+    }, [region, category, comparisonActive]);
 
 
     // loading markers/polylines for events
@@ -394,15 +406,14 @@ export default function Terralert() {
 
             <ThemedView style={[
                 styles.statusBarContainer,
-                    {
-                    backgroundColor: colors.background,
-                    paddingTop: responsiveScaling.scale(60)
-                }]}>
+                {}
+            ]}>
                 <ThemedView style={[
                     styles.statusBar,
                     {
                         backgroundColor: colors.background,
-                        paddingHorizontal: responsiveScaling.scale(5)
+                        paddingHorizontal: responsiveScaling.scale(5),
+                        paddingTop: responsiveScaling.scale(60)
                     }]}>
                     <ThemedText style={[
                         styles.statusBarText,
@@ -452,6 +463,31 @@ export default function Terralert() {
                     >
                         {onlineSyncStatus}
                     </ThemedText>
+                </ThemedView>
+                <ThemedView style={[
+                    styles.helpBar,
+                    {
+                        backgroundColor: 'rgba(0,0,0,0)',
+                        padding: responsiveScaling.scale(5),
+                    }
+                ]}>
+                    <Pressable
+                        onPress={handleHelpPressed}
+                    style={({pressed}) => [
+                        {
+                            width: 'auto',
+                            height: 'auto',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 100,
+                            backgroundColor: colors.text,
+                            transform: [{ scale: pressed ? 0.96 : 1 }],
+                            //opacity: pressed && Platform.OS === 'ios' ? 0.7 : 1,
+                        }
+                    ]}>
+                        <IconComponent library={'MaterialIcons'} name={'help'} color={ colors.background} size={40}/>
+                    </Pressable>
                 </ThemedView>
             </ThemedView>
 
@@ -609,12 +645,20 @@ export default function Terralert() {
                     borderColor: colors.border
                 }]}>
                 <ThemedView style={[
+                    styles.helpContainer,
+                    helpOpen ? styles.display_true : styles.display_false,
+                    {
+                        backgroundColor: colors.background,
+                    }
+                ]}>
+                    <HelpView setHelpOpen={setHelpOpen}/>
+                </ThemedView>
+                <ThemedView style={[
                     styles.legendContainer,
                     comparisonActive ? styles.display_true : styles.display_false,
                     {
                         justifyContent: 'flex-start',
                         backgroundColor: colors.background,
-                        borderColor: colors.border
                     }]}>
                     <HistoryLegend years={historyTimeFrame} activeYears={activeYears} setActiveYears={setActiveYears}/>
                 </ThemedView>
@@ -709,6 +753,14 @@ const styles = StyleSheet.create({
         height: 'auto'
     },
 
+    helpBar: {
+        width: "100%",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "flex-end",
+        height: 'auto'
+    },
+
     comparisonInfo: {
         width: "100%",
         flexDirection: "row",
@@ -747,6 +799,13 @@ const styles = StyleSheet.create({
     },
 
     legendContainer: {
+        width: "100%",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
+    helpContainer: {
         width: "100%",
         flexDirection: "column",
         justifyContent: "center",

@@ -29,7 +29,7 @@ export function EventDetailView(props: EventDetailViewProps) {
         } else {
             console.warn('Cannot open URL: ' + url);
         }
-    }, [])
+    }, [url])
 
     return(
         <View style={[

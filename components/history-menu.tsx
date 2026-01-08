@@ -28,13 +28,12 @@ export function HistoryMenu(props: HistoryMenuProps) {
 
     console.log("init category: " + category.category)
 
-    const categoriesForComparison = ["st", "ea"];
-    let selectableCategories: DropdownItem[] = [];
-    categoriesForComparison.forEach( (category) =>{
-        let selectableCategory: DropdownItem = {label: parseCategoryToFullName(category).toUpperCase(), value: category};
-        selectableCategories.push(selectableCategory);
-        console.log(selectableCategory)
-    })
+    const selectableCategories = React.useMemo<DropdownItem[]>(() => {
+        return ["st", "ea"].map(category => ({
+            label: parseCategoryToFullName(category).toUpperCase(),
+            value: category
+        }));
+    }, []);
 
     const handleCategorySelected = (selected: DropdownItem) => {
         if (typeof selected.value == "string") {
@@ -47,18 +46,25 @@ export function HistoryMenu(props: HistoryMenuProps) {
 
     const today = new Date();
     const currentYear = today.getFullYear();
-    let selectableYearDropdownItems: DropdownItem[] = [];
-    for (let year = MIN_YEAR; year <= currentYear; year++) {
-        let selectableYear: DropdownItem = {label: year.toString(), value: year};
-        selectableYearDropdownItems.push(selectableYear);
-    }
+    const selectableYearDropdownItems = React.useMemo<DropdownItem[]>(() => {
+        const years: DropdownItem[] = [];
+        for (let year = MIN_YEAR; year <= currentYear; year++) {
+            years.push({ label: year.toString(), value: year });
+        }
+        return years;
+    }, [currentYear]);
+
+    const getStartYearItems = () => selectableYearDropdownItems;
+
+    const getEndYearItems = () =>
+        selectableYearDropdownItems.slice(1);
 
     const yearZeroItem: DropdownItem = {label: '', value: 0};
 
     const [yearStart, setYearStart] = useState(yearZeroItem);
     const [yearEnd, setYearEnd] = useState(yearZeroItem);
-    const [possibleStartYearItems, setPossibleStartYearItems] = useState(selectableYearDropdownItems);
-    const [possibleEndYearItems, setPossibleEndYearItems] = useState(selectableYearDropdownItems);
+    const [possibleStartYearItems, setPossibleStartYearItems] = useState(getStartYearItems);
+    const [possibleEndYearItems, setPossibleEndYearItems] = useState(getEndYearItems);
 
     const handleYearSelected = (newStart: DropdownItem, newEnd: DropdownItem) => {
         setYearStart(newStart);
@@ -66,25 +72,23 @@ export function HistoryMenu(props: HistoryMenuProps) {
 
         setPossibleEndYearItems(
             selectableYearDropdownItems.filter(
-                (y) => newStart.value === 0 || y.value > newStart.value
+                y => newStart.value === 0 || y.value > newStart.value
             )
         );
 
         setPossibleStartYearItems(
             selectableYearDropdownItems.filter(
-                (y) => newEnd.value === 0 || y.value < newEnd.value
+                y => newEnd.value === 0 || y.value < newEnd.value
             )
         );
-    }
+    };
 
-    let selectableRegions: DropdownItem[] = [];
-    props.regions.forEach((region) => {
-        let regionItem: DropdownItem = {
+    const selectableRegions = React.useMemo<DropdownItem[]>(() => {
+        return props.regions.map(region => ({
             label: region.description,
             value: region.name
-        }
-        selectableRegions.push(regionItem);
-    })
+        }));
+    }, [props.regions]);
 
     const [historyRegion, setHistoryRegion] = useState<TerralertRegion | null>(null);
 
@@ -112,6 +116,7 @@ export function HistoryMenu(props: HistoryMenuProps) {
             props.setRegion(historyRegion);
             props.setComparisonActive(true);
             props.toggleHistoryMenuVisibility(false);
+            setValidComparison(true);
         }
         else {
             setValidComparison(false);
@@ -121,8 +126,12 @@ export function HistoryMenu(props: HistoryMenuProps) {
     const resetComparisonValues = () => {
         setYearStart(yearZeroItem);
         setYearEnd(yearZeroItem);
+
+        setPossibleStartYearItems(getStartYearItems());
+        setPossibleEndYearItems(getEndYearItems());
+
         setHistoryRegion(null);
-    }
+    };
 
     return(
         <View style={[
