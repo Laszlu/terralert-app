@@ -2,7 +2,7 @@ export default ({ config }) => ({
     ...config,
     name: "TERRALERT",
     slug: "TERRALERT",
-    version: "1.0.0",
+    version: "1.1.0",
     orientation: "portrait",
     icon: "./assets/images/terralert_icon.png",
     scheme: "terralert",
@@ -16,6 +16,7 @@ export default ({ config }) => ({
             ITSAppUsesNonExemptEncryption: false,
             NSLocationWhenInUseUsageDescription:
                 "This app uses your location to show nearby events.",
+            LSApplicationQueriesSchemes: ["mailto"]
         },
     },
 

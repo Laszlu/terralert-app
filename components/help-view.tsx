@@ -8,14 +8,16 @@ import ScrollView = Animated.ScrollView;
 import {
     ABOUT_DATA,
     ABOUT_DEV,
-    ABOUT_WELCOME,
+    ABOUT_WELCOME, GITHUB_URL,
     HELP_CATEGORY,
     HELP_COMPARISON,
     HELP_REGION,
-    HELP_SETTINGS
+    HELP_SETTINGS, HELP_UI, MAIL_URL
 } from "@/constants/constants";
-import React, {useState} from "react";
+import React, {useCallback, useState} from "react";
 import {Image} from "expo-image";
+import * as Linking from "expo-linking";
+import Constants from 'expo-constants';
 
 export type HelpViewProps = {
     setHelpOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -26,6 +28,26 @@ export function HelpView(props: HelpViewProps) {
     const responsiveScaling = useResponsiveScaling();
 
     const [helpSelected, setHelpSelected] = useState(true);
+
+    const handleMailBtnPressed = useCallback(async () => {
+        const supported = await Linking.canOpenURL(MAIL_URL);
+
+        if (supported) {
+            await Linking.openURL(MAIL_URL);
+        } else {
+            console.warn('Cannot open URL: ' + MAIL_URL);
+        }
+    }, []);
+
+    const handleGitBtnPressed = useCallback(async () => {
+        const supported = await Linking.canOpenURL(GITHUB_URL);
+
+        if (supported) {
+            await Linking.openURL(GITHUB_URL);
+        } else {
+            console.warn('Cannot open URL: ' + GITHUB_URL);
+        }
+    }, []);
 
     return (
         <ThemedView style={[
@@ -133,6 +155,34 @@ export function HelpView(props: HelpViewProps) {
                         <ThemedView style={[
                             styles.helpViewRowContentLeft
                         ]}>
+                            <IconComponent library={'MaterialIcons'} name={'info'} color={colors.text} size={30} />
+                        </ThemedView>
+                        <ThemedView style={[
+                            styles.helpViewRowContentRight
+                        ]}>
+                            <ThemedText style={[
+                                styles.helpViewText,
+                                {
+                                    fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 16 : 14),
+                                    marginLeft: responsiveScaling.scale(5)
+                                }
+                            ]}>
+                                {HELP_UI}
+                            </ThemedText>
+                        </ThemedView>
+                    </ThemedView>
+
+                    <ThemedView style={[
+                        styles.helpViewRow,
+                        {
+                            paddingLeft: responsiveScaling.scale(5),
+                            paddingRight: responsiveScaling.scale(20),
+                            paddingTop: responsiveScaling.scale(15)
+                        }
+                    ]}>
+                        <ThemedView style={[
+                            styles.helpViewRowContentLeft
+                        ]}>
                             <IconComponent library={'MaterialIcons'} name={'storm'} color={colors.text} size={30} />
                         </ThemedView>
                         <ThemedView style={[
@@ -141,7 +191,7 @@ export function HelpView(props: HelpViewProps) {
                             <ThemedText style={[
                                 styles.helpViewText,
                                 {
-                                    fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                                    fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 16 : 14),
                                     marginLeft: responsiveScaling.scale(5)
                                 }
                             ]}>
@@ -169,7 +219,7 @@ export function HelpView(props: HelpViewProps) {
                             <ThemedText style={[
                                 styles.helpViewText,
                                 {
-                                    fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                                    fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 16 : 14),
                                     marginLeft: responsiveScaling.scale(5)
                                 }
                             ]}>
@@ -197,7 +247,7 @@ export function HelpView(props: HelpViewProps) {
                             <ThemedText style={[
                                 styles.helpViewText,
                                 {
-                                    fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                                    fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 16 : 14),
                                     marginLeft: responsiveScaling.scale(5)
                                 }
                             ]}>
@@ -225,7 +275,7 @@ export function HelpView(props: HelpViewProps) {
                             <ThemedText style={[
                                 styles.helpViewText,
                                 {
-                                    fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                                    fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 16 : 14),
                                     marginLeft: responsiveScaling.scale(5)
                                 }
                             ]}>
@@ -253,7 +303,7 @@ export function HelpView(props: HelpViewProps) {
                                 fontWeight: 'bold'
                             }
                         ]}>
-                            {ABOUT_WELCOME}
+                            {ABOUT_WELCOME + " " + Constants.expoConfig?.version}
                         </ThemedText>
                     </ThemedView>
 
@@ -307,6 +357,36 @@ export function HelpView(props: HelpViewProps) {
                         ]}>
                             {ABOUT_DEV}
                         </ThemedText>
+                    </ThemedView>
+
+                    <ThemedView style={[
+                        styles.aboutViewRow,
+                        {
+                            paddingHorizontal: responsiveScaling.scale(35),
+                            paddingTop: responsiveScaling.scale(15),
+                            justifyContent: 'space-evenly'
+                        }
+                    ]}>
+                        <Pressable
+                            onPress={handleMailBtnPressed}
+                            style={({pressed}) => [
+                            {
+                                transform: [{ scale: pressed ? 0.96 : 1 }],
+                                opacity: pressed && Platform.OS === 'ios' ? 0.7 : 1,
+                            }
+                        ]}>
+                            <IconComponent library={'MaterialIcons'} name={'mail'} size={40} color={colors.text} />
+                        </Pressable>
+                        <Pressable
+                            onPress={handleGitBtnPressed}
+                            style={({pressed}) => [
+                            {
+                                transform: [{ scale: pressed ? 0.96 : 1 }],
+                                opacity: pressed && Platform.OS === 'ios' ? 0.7 : 1,
+                            }
+                        ]}>
+                            <IconComponent library={'MaterialCommunityIcons'} name={'github'} size={40} color={colors.text} />
+                        </Pressable>
                     </ThemedView>
 
                     <ThemedView style={[
