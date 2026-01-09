@@ -1,4 +1,4 @@
-import {Button, StyleSheet, TouchableOpacity, View} from "react-native";
+import {StyleSheet, TouchableOpacity, View} from "react-native";
 import {IconComponent} from "@/components/icon-component";
 import {pinColors} from "@/constants/constants";
 import {ThemedText} from "@/components/themed-text";
@@ -12,6 +12,7 @@ export type HistoryLegendProps = {
     activeYears: number[];
     setActiveYears:  React.Dispatch<React.SetStateAction<number[]>>;
     endComparison: () => void;
+    historyMenuVisibility: boolean;
 }
 
 export function HistoryLegend(props: HistoryLegendProps) {
@@ -74,7 +75,7 @@ export function HistoryLegend(props: HistoryLegendProps) {
                     </View>
                 ))}
             </View>
-            <View>
+            {!props.historyMenuVisibility && <View>
                 <ThemedButton
                     title={'END COMPARISON'}
                     iconName={'stop-circle-outline'}
@@ -85,7 +86,7 @@ export function HistoryLegend(props: HistoryLegendProps) {
                     selected={false}
                     disabled={false}
                 />
-            </View>
+            </View>}
         </View>
     )
 }

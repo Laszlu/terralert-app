@@ -1,6 +1,6 @@
 import 'react-native-reanimated';
 import {ThemedView} from "@/components/themed-view";
-import {ActivityIndicator, Platform, Pressable, StyleSheet, TouchableOpacity} from "react-native";
+import {ActivityIndicator, Pressable, StyleSheet} from "react-native";
 import MapView, {Callout, Marker, Polyline, PROVIDER_GOOGLE,} from "react-native-maps";
 import {OptionItem, OptionsStack} from "@/components/option-stack";
 import {useEffect, useMemo, useRef, useState} from "react";
@@ -36,7 +36,6 @@ import {syncRegionYear} from "@/services/event-sync-service";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {CustomCallout} from "@/components/ui/custom-callout";
 import {EventDetailView} from "@/components/ui/event-detail-view";
-import {ThemedButton} from "@/components/themed-button";
 import {HelpView} from "@/components/help-view";
 
 export default function Terralert() {
@@ -667,7 +666,12 @@ export default function Terralert() {
                         justifyContent: 'flex-start',
                         backgroundColor: colors.background,
                     }]}>
-                    <HistoryLegend years={historyTimeFrame} activeYears={activeYears} setActiveYears={setActiveYears} endComparison={endComparison}/>
+                    <HistoryLegend
+                        years={historyTimeFrame}
+                        activeYears={activeYears}
+                        setActiveYears={setActiveYears}
+                        endComparison={endComparison}
+                        historyMenuVisibility={historyMenuVisibility}/>
                 </ThemedView>
                 <ThemedView style={[
                     styles.optionsContainer,

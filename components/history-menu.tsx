@@ -147,18 +147,9 @@ export function HistoryMenu(props: HistoryMenuProps) {
             <View style={[
                 styles.historyMenuHeader,
                 {
-                    paddingVertical: responsiveScaling.scale(10)
+                    //paddingVertical: responsiveScaling.scale(10)
                 }
             ]}>
-                <ThemedText style={[
-                    styles.historyMenuText,
-                    {
-                        fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
-                        marginHorizontal: responsiveScaling.scale(5),
-                    }
-                ]}>
-                    HISTORICAL COMPARISON
-                </ThemedText>
                 {!validComparison &&
                     <ThemedText style={[
                         styles.historyMenuErrorText,
