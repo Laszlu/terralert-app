@@ -303,7 +303,7 @@ export function HelpView(props: HelpViewProps) {
                                 fontWeight: 'bold'
                             }
                         ]}>
-                            {ABOUT_WELCOME + " " + Constants.expoConfig?.version}
+                            {ABOUT_WELCOME + "\nVersion " + Constants.expoConfig?.version}
                         </ThemedText>
                     </ThemedView>
 
