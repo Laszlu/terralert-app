@@ -3,7 +3,7 @@ import {ThemedView} from "@/components/themed-view";
 import {ActivityIndicator, Platform, Pressable, StyleSheet, TouchableOpacity} from "react-native";
 import MapView, {Callout, Marker, Polyline, PROVIDER_GOOGLE,} from "react-native-maps";
 import {OptionItem, OptionsStack} from "@/components/option-stack";
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 
 import testEvent from '../model/TestEvent.json'
 import {TerralertEvent, TerralertEventListByYear} from "@/model/event";
@@ -157,6 +157,8 @@ export default function Terralert() {
         setComparisonActive(false);
         onRegionChange(null);
         toggleHistoryMenuVisibility(false);
+
+        setMarkers(prev => [...prev]);
     }
 
     const handleHelpPressed = () => {
@@ -208,7 +210,6 @@ export default function Terralert() {
     const handleMarkerPressed = (marker: TerralertMapMarker) => {
         setSelectedMarker(marker);
         toggleDetailViewVisibility(true);
-        console.log(detailViewVisibility)
     }
 
     //-------------------
@@ -224,7 +225,6 @@ export default function Terralert() {
         async function loadLocation() {
             try {
                 const loc = await getCurrentLocation();
-                console.log(loc.latitude + " " + loc.longitude)
                 setLocation(loc);
             } catch (e) {
                 setLoading({status: "error", message: (e as Error).message});
@@ -236,22 +236,24 @@ export default function Terralert() {
         loadLocation();
     }, []);
 
+    const mapPadding = useMemo(() => ({
+        top: responsiveScaling.scale(50),
+        right: responsiveScaling.scale(80),
+        bottom: responsiveScaling.scale(80),
+        left: responsiveScaling.scale(80),
+    }), [responsiveScaling]);
+
     // moving map to region
     useEffect(() => {
         if (region !== null) {
             const coords = regionToBoundingBoxCoords(region);
 
             mapRef.current?.fitToCoordinates(coords, {
-                edgePadding: {
-                    top: responsiveScaling.scale(50),
-                    right: responsiveScaling.scale(80),
-                    bottom: responsiveScaling.scale(80),
-                    left: responsiveScaling.scale(80)
-                },
+                edgePadding: mapPadding,
                 animated: true,
             });
         }
-    }, [region, responsiveScaling]);
+    }, [mapPadding, region]);
 
     // loading events
     useEffect(() => {
@@ -269,9 +271,6 @@ export default function Terralert() {
 
                 if (!cancelled) {
                     setEventData(events);
-                    if (!comparisonActive) {
-                        setRegion(null);
-                    }
                 }
             } catch (e) {
                 if (!cancelled) {
@@ -289,7 +288,7 @@ export default function Terralert() {
         return () => {
             cancelled = true;
         };
-    }, [region, category, comparisonActive]);
+    }, [category, lastSync]);
 
 
     // loading markers/polylines for events
@@ -583,7 +582,7 @@ export default function Terralert() {
 
                     onRegionChange={(region, details) => {
                         if(details.isGesture && !comparisonActive) {
-                            onRegionChange(null)
+                            onRegionChange(null);
                         }
                     }}
                     onPress={() =>{
@@ -601,7 +600,7 @@ export default function Terralert() {
                     {activeMarkers.map((m, index) => (
                         <Marker
                             pinColor={comparisonActive ? m.color : undefined}
-                            key={index}
+                            key={m.event!.id + " " + m.color}
                             coordinate={{ latitude: m.latitude, longitude: m.longitude }}
                             title={m.title}
                             description={m.description}
@@ -654,13 +653,21 @@ export default function Terralert() {
                     <HelpView setHelpOpen={setHelpOpen}/>
                 </ThemedView>
                 <ThemedView style={[
+                    styles.optionsContainer,
+                    detailViewVisibility ? styles.display_true : styles.display_false
+                ]}>
+                    {selectedMarker &&
+                        <EventDetailView marker={selectedMarker} setDetailOpen={toggleDetailViewVisibility}/>
+                    }
+                </ThemedView>
+                <ThemedView style={[
                     styles.legendContainer,
                     comparisonActive ? styles.display_true : styles.display_false,
                     {
                         justifyContent: 'flex-start',
                         backgroundColor: colors.background,
                     }]}>
-                    <HistoryLegend years={historyTimeFrame} activeYears={activeYears} setActiveYears={setActiveYears}/>
+                    <HistoryLegend years={historyTimeFrame} activeYears={activeYears} setActiveYears={setActiveYears} endComparison={endComparison}/>
                 </ThemedView>
                 <ThemedView style={[
                     styles.optionsContainer,
@@ -694,14 +701,6 @@ export default function Terralert() {
                         toggleHistoryMenuVisibility={toggleHistoryMenuVisibility}
                         endComparison={endComparison}
                     />
-                </ThemedView>
-                <ThemedView style={[
-                    styles.optionsContainer,
-                    detailViewVisibility ? styles.display_true : styles.display_false
-                ]}>
-                    {selectedMarker &&
-                        <EventDetailView marker={selectedMarker} />
-                    }
                 </ThemedView>
                 <MenuBar
                     actions={actions}

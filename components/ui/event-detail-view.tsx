@@ -1,16 +1,18 @@
 import {TerralertEvent} from "@/model/event";
 import {useMyTheme} from "@/hooks/useCustomTheme";
 import {useResponsiveScaling} from "@/hooks/use-responsive-scaling";
-import {View, StyleSheet} from "react-native";
+import {View, StyleSheet, Platform, Pressable} from "react-native";
 import {ThemedText} from "@/components/themed-text";
 import {parseDateFromMarker} from "@/helper/ui-helper";
 import {TerralertMapMarker} from "@/helper/terralert-event-helper";
 import {ThemedButton} from "@/components/themed-button";
-import {useCallback} from "react";
+import React, {useCallback} from "react";
 import * as Linking from 'expo-linking';
+import {IconComponent} from "@/components/icon-component";
 
 export type EventDetailViewProps = {
     marker: TerralertMapMarker;
+    setDetailOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export function EventDetailView(props: EventDetailViewProps) {
@@ -36,7 +38,7 @@ export function EventDetailView(props: EventDetailViewProps) {
             styles.detailViewMainView,
             {
                 backgroundColor: colors.background,
-                paddingVertical: responsiveScaling.scale(10),
+                paddingVertical: responsiveScaling.scale(15),
                 paddingHorizontal: responsiveScaling.scale(30),
             }
         ]}>
@@ -51,6 +53,33 @@ export function EventDetailView(props: EventDetailViewProps) {
                     }
                 ]}>
                     {props.marker.event!.title!.toUpperCase()}
+                </ThemedText>
+            </View>
+            <Pressable
+                onPress={()=> {props.setDetailOpen(false)}}
+                style={({pressed}) => [
+                    {
+                        position: 'absolute',
+                        top: responsiveScaling.scale(10),
+                        right: responsiveScaling.scale(10),
+                        transform: [{ scale: pressed ? 0.96 : 1 }],
+                        opacity: pressed && Platform.OS === 'ios' ? 0.7 : 1,
+                    }
+                ]}>
+                <IconComponent library={'MaterialCommunityIcons'} name={'close-circle'} size={30} color={colors.text}/>
+            </Pressable>
+            <View style={[
+                styles.detailViewRow
+            ]}>
+                <ThemedText style={[
+                    styles.detailViewRowContentLeft
+                ]}>
+                    ID:
+                </ThemedText>
+                <ThemedText style={[
+                    styles.detailViewRowContentRight
+                ]}>
+                    {props.marker.event!.id}
                 </ThemedText>
             </View>
             <View style={[

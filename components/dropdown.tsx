@@ -48,7 +48,7 @@ export function Dropdown(props: DropdownProps) {
                         color: colors.background
                     }
                 ]}>
-                    {selectedItem ? selectedItem.label : props.placeholder}
+                    {selectedItem ? selectedItem.label.toUpperCase() : props.placeholder}
                 </ThemedText>
             </TouchableOpacity>
 
@@ -93,7 +93,7 @@ export function Dropdown(props: DropdownProps) {
                                             color: colors.text,
                                             fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
                                         }]}>
-                                        {item.label}
+                                        {item.label.toUpperCase()}
                                     </ThemedText>
                                 </TouchableOpacity>
                             )}

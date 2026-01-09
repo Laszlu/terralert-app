@@ -51,7 +51,7 @@ export function OptionsStack(optionsStackProps: OptionsStackProps) {
                         fontWeight: "bold",
                         fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16)
                     }}>
-                        {item.label}
+                        {item.label.toUpperCase()}
                     </ThemedText>
                 </TouchableOpacity>
             ))}

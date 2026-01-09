@@ -44,6 +44,14 @@ export function parseCategoryStateToDbId(category: CategoryState) : string {
     }
 }
 
+function sign(n: number) {
+    return Math.sign(n);
+}
+
+function sameSign(a: number, b: number) {
+    return Math.sign(a) === Math.sign(b);
+}
+
 function filterOutlierCoordinates(geometry: TerralertGeometry[]): TerralertGeometry[] {
     if (geometry.length <= 2) return geometry; // not enough points to detect outliers
 
@@ -75,6 +83,53 @@ function filterOutlierCoordinates(geometry: TerralertGeometry[]): TerralertGeome
         if (!prevPt || !nextPt || prevPt.length !== 2 || nextPt.length !== 2) {
             result.push(curr);
             continue;
+        }
+
+        const [prevLon, prevLat] = prevPt;
+        const [nextLon, nextLat] = nextPt;
+
+        // 🚨 Detect sign-flip outlier
+        const lonSignFlip =
+            !sameSign(lon, prevLon) &&
+            !sameSign(lon, nextLon) &&
+            sameSign(prevLon, nextLon);
+
+        const latSignFlip =
+            !sameSign(lat, prevLat) &&
+            !sameSign(lat, nextLat) &&
+            sameSign(prevLat, nextLat);
+
+        if (latSignFlip || (lonSignFlip && Math.abs(lon) < 170)) {
+            console.log(
+                `Removed sign-flip outlier at index ${i}: lon=${lon}, lat=${lat}`
+            );
+            continue;
+        }
+
+        // 🚨 Handle consecutive sign-flip run (BAD → BAD)
+        const prevPrevPt = geometry[i - 2]?.coordinates[0]?.pointCoordinates;
+        const nextNextPt = geometry[i + 2]?.coordinates[0]?.pointCoordinates;
+
+        if (prevPrevPt && nextNextPt) {
+            const [ppLon, ppLat] = prevPrevPt;
+            const [nnLon, nnLat] = nextNextPt;
+
+            const lonRunFlip =
+                sign(lon) !== sign(ppLon) &&
+                sign(lon) !== sign(nnLon) &&
+                sign(ppLon) === sign(nnLon);
+
+            const latRunFlip =
+                sign(lat) !== sign(ppLat) &&
+                sign(lat) !== sign(nnLat) &&
+                sign(ppLat) === sign(nnLat);
+
+            if (latRunFlip || (lonRunFlip && Math.abs(lon) < 170)) {
+                console.log(
+                    `Removed consecutive sign-flip at index ${i}: lon=${lon}, lat=${lat}`
+                );
+                continue;
+            }
         }
 
         const prevLonDiff = Math.abs(lon - prevPt[0]);

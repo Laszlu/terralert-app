@@ -2,6 +2,15 @@ import {Category, Source, TerralertCoordinates, TerralertEvent, TerralertGeometr
 import {db} from "@/components/database-provider";
 import {TerralertRegion} from "@/helper/terralert-region-helper";
 
+export async function checkIfDbIsEmpty() {
+    const rows = await db.getAllAsync<{ last_synced: string }>(
+        `SELECT * FROM sync_status`,
+        []
+    );
+
+    return rows.length === 0;
+}
+
 export async function insertEvents(events: TerralertEvent[]) {
     await db.withTransactionAsync(async () => {
         for (const e of events) {
@@ -12,6 +21,29 @@ export async function insertEvents(events: TerralertEvent[]) {
 
 async function insertSingleEvent(e: TerralertEvent) {
     if (!e.id) return;
+
+    const existingEvent = await db.getAllAsync(
+        `SELECT id FROM events WHERE id = ?`,
+        [e.id]
+    );
+
+    if (existingEvent) {
+        // Delete old relationships
+        await db.runAsync(`DELETE FROM event_categories WHERE event_id = ?`, [e.id]);
+        await db.runAsync(`DELETE FROM event_sources WHERE event_id = ?`, [e.id]);
+
+        // Delete old geometry + coordinates
+        const geometries = await db.getAllAsync<{ id: number }>(
+            `SELECT id FROM geometry WHERE event_id = ?`,
+            [e.id]
+        );
+
+        for (const g of geometries) {
+            await db.runAsync(`DELETE FROM geometry_coordinates WHERE geometry_id = ?`, [g.id]);
+        }
+
+        await db.runAsync(`DELETE FROM geometry WHERE event_id = ?`, [e.id]);
+    }
 
     await db.runAsync(
         `INSERT OR REPLACE INTO events
@@ -74,6 +106,7 @@ async function insertSingleEvent(e: TerralertEvent) {
         await insertGeometryCoordinates(geometryId, g.coordinates);
     }
 }
+
 async function insertGeometryCoordinates(
     geometryId: number,
     coords: TerralertCoordinates[]

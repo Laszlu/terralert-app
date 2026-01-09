@@ -2,7 +2,7 @@ import {StyleSheet, View} from "react-native";
 import {ThemedText} from "@/components/themed-text";
 import {Dropdown, DropdownItem} from "@/components/dropdown";
 import {MIN_YEAR} from "@/constants/constants";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {TerralertRegion} from "@/helper/terralert-region-helper";
 import {ThemedButton} from "@/components/themed-button";
 import {useCategoryState} from "@/components/category-state-context";
@@ -25,8 +25,6 @@ export function HistoryMenu(props: HistoryMenuProps) {
     const {colors} = useMyTheme();
     const responsiveScaling = useResponsiveScaling();
     const {category, setCategory} = useCategoryState();
-
-    console.log("init category: " + category.category)
 
     const selectableCategories = React.useMemo<DropdownItem[]>(() => {
         return ["st", "ea"].map(category => ({
@@ -72,13 +70,13 @@ export function HistoryMenu(props: HistoryMenuProps) {
 
         setPossibleEndYearItems(
             selectableYearDropdownItems.filter(
-                y => newStart.value === 0 || y.value > newStart.value
+                y => newStart.value === 0 || y.value >= newStart.value
             )
         );
 
         setPossibleStartYearItems(
             selectableYearDropdownItems.filter(
-                y => newEnd.value === 0 || y.value < newEnd.value
+                y => newEnd.value === 0 || y.value <= newEnd.value
             )
         );
     };
@@ -122,6 +120,12 @@ export function HistoryMenu(props: HistoryMenuProps) {
             setValidComparison(false);
         }
     }
+
+    useEffect(() => {
+        if (!props.comparisonActive) {
+             resetComparisonValues();
+        }
+    }, [props.comparisonActive]);
 
     const resetComparisonValues = () => {
         setYearStart(yearZeroItem);

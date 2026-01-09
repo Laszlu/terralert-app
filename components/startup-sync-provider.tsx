@@ -3,6 +3,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {syncEventsFromBackend} from "@/services/event-sync-service";
 import {getRegionsForCategory} from "@/helper/terralert-region-helper";
 import {getApiVersion} from "@/api/terralert-client";
+import {db} from "@/components/database-provider";
+import {checkIfDbIsEmpty} from "@/repositories/event-repository";
 
 interface StartupSyncContextType {
     isOnline: boolean;
@@ -29,10 +31,14 @@ async function shouldSync() {
         return true;
     }
 
+    if (await checkIfDbIsEmpty()) {
+        return true;
+    }
+
     const lastSyncDate = new Date(lastSyncStr);
     const now = new Date();
     const diffMs = now.getTime() - lastSyncDate.getTime();
-    return diffMs > 24 * MS_PER_HOUR;
+    return diffMs > 12 * MS_PER_HOUR;
 }
 
 export function StartupSyncProvider({ children }: { children: React.ReactNode }) {

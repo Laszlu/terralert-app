@@ -39,7 +39,7 @@ export function HelpView(props: HelpViewProps) {
             <ThemedView style={[
                 styles.helpViewHeaderRow,
                 {
-                    paddingBottom: responsiveScaling.scale(0)
+                    marginBottom: responsiveScaling.scale(10)
                 }
             ]}>
                 <ThemedView style={[
@@ -110,8 +110,8 @@ export function HelpView(props: HelpViewProps) {
                     style={({pressed}) => [
                     {
                         position: 'absolute',
-                        top: -5,
-                        right: 10,
+                        top: responsiveScaling.scale(-5),
+                        right: responsiveScaling.scale(10),
                         transform: [{ scale: pressed ? 0.96 : 1 }],
                         opacity: pressed && Platform.OS === 'ios' ? 0.7 : 1,
                     }
@@ -249,7 +249,8 @@ export function HelpView(props: HelpViewProps) {
                             styles.aboutViewText,
                             {
                                 fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 20 : 18),
-                                marginLeft: responsiveScaling.scale(5)
+                                marginLeft: responsiveScaling.scale(5),
+                                fontWeight: 'bold'
                             }
                         ]}>
                             {ABOUT_WELCOME}

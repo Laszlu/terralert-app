@@ -5,11 +5,13 @@ import {ThemedText} from "@/components/themed-text";
 import {useMyTheme} from "@/hooks/useCustomTheme";
 import {useResponsiveScaling} from "@/hooks/use-responsive-scaling";
 import React from "react";
+import {ThemedButton} from "@/components/themed-button";
 
 export type HistoryLegendProps = {
     years: number[];
     activeYears: number[];
     setActiveYears:  React.Dispatch<React.SetStateAction<number[]>>;
+    endComparison: () => void;
 }
 
 export function HistoryLegend(props: HistoryLegendProps) {
@@ -17,7 +19,11 @@ export function HistoryLegend(props: HistoryLegendProps) {
     const responsiveScaling = useResponsiveScaling();
 
     return(
-        <>
+        <View style={[
+            {
+                flexDirection: 'column'
+            }
+        ]}>
             <View style={[
                 styles.historyLegendView,
                 {
@@ -68,7 +74,19 @@ export function HistoryLegend(props: HistoryLegendProps) {
                     </View>
                 ))}
             </View>
-        </>
+            <View>
+                <ThemedButton
+                    title={'END COMPARISON'}
+                    iconName={'stop-circle-outline'}
+                    iconLibrary={"MaterialCommunityIcons"}
+                    onPress={() => {
+                        props.endComparison();
+                    }}
+                    selected={false}
+                    disabled={false}
+                />
+            </View>
+        </View>
     )
 }
 
