@@ -31,6 +31,11 @@ export default ({ config }) => ({
         predictiveBackGestureEnabled: false,
         package: "com.laszlu.TERRALERT",
         permissions: ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
+        config: {
+            googleMaps: {
+                apiKey: process.env.GOOGLE_MAPS_API_KEY,
+            },
+        },
     },
 
     web: {
@@ -43,6 +48,7 @@ export default ({ config }) => ({
             "react-native-maps",
             {
                 iosGoogleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+                androidGoogleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
             },
         ],
         [
