@@ -1,6 +1,6 @@
 import 'react-native-reanimated';
 import {ThemedView} from "@/components/themed-view";
-import {ActivityIndicator, Pressable, StyleSheet} from "react-native";
+import {ActivityIndicator, Platform, Pressable, StyleSheet} from "react-native";
 import MapView, {Callout, Marker, Polyline, PROVIDER_GOOGLE,} from "react-native-maps";
 import {OptionItem, OptionsStack} from "@/components/option-stack";
 import {useEffect, useMemo, useRef, useState} from "react";
@@ -411,7 +411,7 @@ export default function Terralert() {
                     {
                         backgroundColor: colors.background,
                         paddingHorizontal: responsiveScaling.scale(5),
-                        paddingTop: responsiveScaling.scale(60)
+                        paddingTop: (Platform.OS === 'ios' ? responsiveScaling.scale(60) : responsiveScaling.scale(30))
                     }]}>
                     <ThemedText style={[
                         styles.statusBarText,

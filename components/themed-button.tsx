@@ -22,7 +22,6 @@ export function ThemedButton({title, iconName, iconLibrary, onPress, disabled = 
 
     return (
         <Pressable onPress={() => {onPress()}}
-                   android_ripple={{ color: colors.card }}
                    style={({pressed}) => [
                        styles.button,
                        {
