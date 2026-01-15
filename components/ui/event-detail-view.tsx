@@ -39,7 +39,7 @@ export function EventDetailView(props: EventDetailViewProps) {
             {
                 backgroundColor: colors.background,
                 paddingVertical: responsiveScaling.scale(15),
-                paddingHorizontal: responsiveScaling.scale(30),
+                paddingHorizontal: responsiveScaling.scale(40),
             }
         ]}>
             <View style={[

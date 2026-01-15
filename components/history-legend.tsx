@@ -47,11 +47,13 @@ export function HistoryLegend(props: HistoryLegendProps) {
                                     backgroundColor: colors.text
                                 }]}
                             onPress={() => {
-                                props.setActiveYears(prev =>
-                                    prev.includes(year)
+                                props.setActiveYears(prev => {
+                                    const next = prev.includes(year)
                                         ? prev.filter(y => y !== year)
-                                        : [...prev, year].sort((a, b) => a - b)
-                                );
+                                        : [...prev, year].sort((a, b) => a - b);
+
+                                    return next;
+                                });
                             }}
                         >
                             <IconComponent

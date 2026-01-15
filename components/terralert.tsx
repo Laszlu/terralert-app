@@ -1,7 +1,7 @@
 import 'react-native-reanimated';
 import {ThemedView} from "@/components/themed-view";
 import {ActivityIndicator, Platform, Pressable, StyleSheet} from "react-native";
-import MapView, {Callout, Marker, Polyline, PROVIDER_GOOGLE,} from "react-native-maps";
+import MapView, {Callout, Marker, Polyline, PROVIDER_GOOGLE, Polygon} from "react-native-maps";
 import {OptionItem, OptionsStack} from "@/components/option-stack";
 import {useEffect, useMemo, useRef, useState} from "react";
 
@@ -18,7 +18,14 @@ import {
     TerralertPolyLine
 } from "@/helper/terralert-event-helper";
 import {icons, LoadingState, parseCategoryToFullName} from "@/helper/ui-helper";
-import {regionToBoundingBoxCoords, TerralertRegion} from "@/helper/terralert-region-helper";
+import {
+    getRegionCenter,
+    getRegionColor,
+    getRegionsForCategory, makePolygonCoords,
+    regionToBoundingBoxCoords,
+    regionToPolygon,
+    TerralertRegion
+} from "@/helper/terralert-region-helper";
 import {MenuActions, MenuBar} from "@/components/menu-bar";
 import {useCategoryState} from "@/components/category-state-context";
 import {ThemedText} from "@/components/themed-text";
@@ -156,7 +163,7 @@ export default function Terralert() {
         setComparisonActive(false);
         onRegionChange(null);
         toggleHistoryMenuVisibility(false);
-
+        resetMapToUserLocation();
         setMarkers(prev => [...prev]);
     }
 
@@ -211,6 +218,37 @@ export default function Terralert() {
         toggleDetailViewVisibility(true);
     }
 
+    const resetMapToUserLocation = (animated = true, delta = comparisonActive ? 40 : 30) => {
+        if (!location || !mapRef.current) return;
+
+        mapRef.current.animateToRegion(
+            {
+                latitude: location.latitude,
+                longitude: location.longitude,
+                latitudeDelta: 30,
+                longitudeDelta: 60,
+            },
+            animated ? 600 : 0
+        );
+    };
+
+    const moveMapToFirstEvent = (events: TerralertEvent[]) => {
+        if (!mapRef.current || events.length === 0) return;
+
+        const firstMarker = getMarkersForEvents([events[0]])[0];
+        if (!firstMarker) return;
+
+        mapRef.current.animateToRegion(
+            {
+                latitude: firstMarker.latitude,
+                longitude: firstMarker.longitude,
+                latitudeDelta: 120,
+                longitudeDelta: 120,
+            },
+            700
+        );
+    };
+
     //-------------------
     // Use Effects
     //-------
@@ -218,6 +256,11 @@ export default function Terralert() {
     useEffect(() => {
         setOnlineSyncStatus(isOnline ? "ONLINE" : "OFFLINE");
     }, [isOnline]);
+
+    useEffect(() => {
+        setRegion(null);
+        resetMapToUserLocation();
+    }, [category]);
 
     // loading location
     useEffect(() => {
@@ -233,6 +276,8 @@ export default function Terralert() {
         }
 
         loadLocation();
+
+        resetMapToUserLocation();
     }, []);
 
     const mapPadding = useMemo(() => ({
@@ -241,6 +286,11 @@ export default function Terralert() {
         bottom: responsiveScaling.scale(80),
         left: responsiveScaling.scale(80),
     }), [responsiveScaling]);
+
+    const categoryRegions = useMemo(
+        () => getRegionsForCategory(category.category),
+        [category]
+    );
 
     // moving map to region
     useEffect(() => {
@@ -289,6 +339,14 @@ export default function Terralert() {
         };
     }, [category, lastSync]);
 
+    // move map to first event after loading
+    useEffect(() => {
+        if (!eventData) return;
+        if (comparisonActive) return;
+        if (region !== null) return;
+
+        moveMapToFirstEvent(eventData);
+    }, [eventData, comparisonActive, region]);
 
     // loading markers/polylines for events
     useEffect( () => {
@@ -311,20 +369,16 @@ export default function Terralert() {
         }
     }, [eventData, comparisonActive])
 
-    // set timeframe for later usage
-    useEffect(() => {
-        setActiveYears(historyTimeFrame);
-    }, [historyTimeFrame]);
-
     // loading events for comparison
     useEffect(() => {
-        if (!comparisonActive) return;
+        if (!comparisonActive || activeYears.length === 0 || !region) return;
 
         let cancelled = false;
 
         async function load() {
             try {
-                setLoading({status: "loading", message: "EVENTS"});
+                setLoading({status: "loading", message: "COMPARISON EVENTS"});
+                console.log("loading comparison events");
                 await new Promise(resolve => setTimeout(resolve, 0));
 
                 let categoryId = parseCategoryStateToDbId(category);
@@ -344,6 +398,12 @@ export default function Terralert() {
                     }
 
                     eventsByYear.events = await getEventsForRegionYearCategory(region!, yearFromTimeframe, categoryId)
+
+                    if (eventsByYear.events.length === 0) {
+                        console.warn(`No events for year ${yearFromTimeframe}, skipping`);
+                        continue;
+                    }
+
                     eventArraysByYear.push(eventsByYear);
                 }
 
@@ -356,6 +416,7 @@ export default function Terralert() {
                 }
             } finally {
                 if (!cancelled) {
+                    console.log("syncing comparison done")
                     setLoading({ status: "idle" });
                 }
             }
@@ -366,7 +427,7 @@ export default function Terralert() {
         return () => {
             cancelled = true;
         };
-    }, [historyTimeFrame, comparisonActive, category, region, activeYears]);
+    }, [comparisonActive, category, region, activeYears]);
 
     // loading markers/polylines for comparison
     useEffect(() => {
@@ -376,17 +437,18 @@ export default function Terralert() {
             let historyPolylines: TerralertPolyLine[] = [];
 
             historyEventArrays.forEach((eventArray, index) => {
+                if (eventArray.events.length !== 0) {
+                    let markers = getMarkersForHistoryEvents(eventArray.events, eventArray.year);
+                    historyMarkers.push(...markers);
 
-                let markers = getMarkersForHistoryEvents(eventArray.events, eventArray.year);
-                historyMarkers.push(...markers);
+                    eventArray.events.forEach(event => {
+                        const poly = getPolylineForEventWithColor(event, eventArray.year);
 
-                eventArray.events.forEach(event => {
-                    const poly = getPolylineForEventWithColor(event, eventArray.year);
-
-                    if (poly) {
-                        historyPolylines.push(poly);
-                    }
-                });
+                        if (poly) {
+                            historyPolylines.push(poly);
+                        }
+                    });
+                }
             });
 
             setHistoryMarkers(historyMarkers);
@@ -394,7 +456,22 @@ export default function Terralert() {
         }
     }, [historyEventArrays, comparisonActive]);
 
-    const activeMarkers = comparisonActive ? historyMarkers : markers;
+    // clear comparison data on year change
+    useEffect(() => {
+        if (!comparisonActive) return;
+
+        // Clear old data immediately
+        setHistoryEventArrays(null);
+        setHistoryMarkers([]);
+        setHistoryPolylines([]);
+    }, [activeYears]);
+
+    const activeMarkers =
+        comparisonActive && historyEventArrays?.length
+            ? historyMarkers
+            : !comparisonActive
+                ? markers
+                : [];
 
     //-------------------
     // Structure
@@ -572,7 +649,15 @@ export default function Terralert() {
                     style={styles.map}
                     provider={PROVIDER_GOOGLE}
                     ref={mapRef}
-                    region={{
+                    customMapStyle={[
+                        {
+                            featureType: "poi",
+                            elementType: "all",
+                            stylers: [{ visibility: "off" }],
+                        }
+                    ]}
+                    maxZoomLevel={5}
+                    initialRegion={{
                         latitude: location ? location?.latitude : -25,
                         longitude: location ? location?.longitude : -165,
                         latitudeDelta: 30,
@@ -599,7 +684,7 @@ export default function Terralert() {
                     {activeMarkers.map((m, index) => (
                         <Marker
                             pinColor={comparisonActive ? m.color : undefined}
-                            key={m.event!.id + " " + m.color}
+                            key={`marker-${m.year}-${m.event?.id ?? index}`}
                             coordinate={{ latitude: m.latitude, longitude: m.longitude }}
                             title={m.title}
                             description={m.description}
@@ -703,6 +788,7 @@ export default function Terralert() {
                         setComparisonActive={setComparisonActive}
                         setHistoryTimeFrame={setHistoryTimeFrame}
                         toggleHistoryMenuVisibility={toggleHistoryMenuVisibility}
+                        setActiveYears={setActiveYears}
                         endComparison={endComparison}
                     />
                 </ThemedView>

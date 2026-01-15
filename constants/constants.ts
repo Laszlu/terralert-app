@@ -1,4 +1,4 @@
-export const MIN_YEAR = 2015;
+export const MIN_YEAR = 2016;
 
 export const MAX_COORD_JUMP = 8;
 

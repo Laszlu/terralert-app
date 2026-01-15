@@ -19,6 +19,7 @@ export type HistoryMenuProps = {
     toggleHistoryMenuVisibility:  React.Dispatch<React.SetStateAction<boolean>>;
     setHistoryTimeFrame: React.Dispatch<React.SetStateAction<number[]>>;
     endComparison: () => void;
+    setActiveYears:  React.Dispatch<React.SetStateAction<number[]>>;
 }
 
 export function HistoryMenu(props: HistoryMenuProps) {
@@ -111,6 +112,7 @@ export function HistoryMenu(props: HistoryMenuProps) {
 
         if (historyRegion !== null && yearStartValue !== 0 && yearEndValue !== 0) {
             props.setHistoryTimeFrame(comparisonYears);
+            props.setActiveYears(comparisonYears);
             props.setRegion(historyRegion);
             props.setComparisonActive(true);
             props.toggleHistoryMenuVisibility(false);

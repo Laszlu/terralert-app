@@ -1,3 +1,6 @@
+import {LatLng} from "react-native-maps";
+import {pinColors} from "@/constants/constants";
+
 export interface TerralertRegion {
     name: string;
     description: string;
@@ -86,4 +89,75 @@ export function clampRegionLat(region: TerralertRegion): TerralertRegion {
         minLatitude: Math.max(region.minLatitude, -MAX_MERCATOR_LAT),
         maxLatitude: Math.min(region.maxLatitude, MAX_MERCATOR_LAT),
     };
+}
+
+export function regionToPolygon(region: TerralertRegion): LatLng[] {
+    const r = clampRegionLat(region);
+
+    return [
+        { latitude: r.minLatitude, longitude: r.minLongitude }, // bottom-left
+        { latitude: r.minLatitude, longitude: r.maxLongitude }, // bottom-right
+        { latitude: r.maxLatitude, longitude: r.maxLongitude }, // top-right
+        { latitude: r.maxLatitude, longitude: r.minLongitude }, // top-left
+    ];
+}
+
+export function makePolygonCoords(region: TerralertRegion) {
+    const r = clampRegionLat(region);
+
+    const minLat = Math.min(r.minLatitude, r.maxLatitude);
+    const maxLat = Math.max(r.minLatitude, r.maxLatitude);
+
+    let minLon = r.minLongitude;
+    let maxLon = r.maxLongitude;
+
+    // Handle dateline crossing
+    if (maxLon < minLon) maxLon += 360;
+
+    const coords = [
+        { latitude: minLat, longitude: minLon },
+        { latitude: minLat, longitude: maxLon },
+        { latitude: maxLat, longitude: maxLon },
+        { latitude: maxLat, longitude: minLon },
+    ];
+
+    // Wrap longitude back to [-180, 180]
+    return coords.map(c => ({
+        latitude: c.latitude,
+        longitude: ((c.longitude + 180) % 360) - 180
+    }));
+}
+
+
+export function getRegionColor(index: number) {
+    const colors = pinColors.filter(c => c.year >= 2015);
+    return colors[index % colors.length].color;
+}
+
+export function getRegionCenter(region: TerralertRegion) {
+    const r = clampRegionLat(region);
+
+    // Latitude: normal
+    const latitude = (r.minLatitude + r.maxLatitude) / 2;
+
+    let minLon = r.minLongitude;
+    let maxLon = r.maxLongitude;
+
+    let longitude: number;
+
+    if (Math.abs(maxLon - minLon) > 180) {
+        // crosses dateline or long span > 180
+        // swap min/max to compute shortest arc
+        const adjustedMin = (minLon + 360) % 360;
+        const adjustedMax = (maxLon + 360) % 360;
+
+        // midpoint along the shorter arc
+        longitude = ((adjustedMin + adjustedMax) / 2) % 360;
+        if (longitude > 180) longitude -= 360;
+    } else {
+        // normal
+        longitude = (minLon + maxLon) / 2;
+    }
+
+    return { latitude, longitude };
 }
