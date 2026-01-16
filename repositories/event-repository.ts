@@ -22,88 +22,43 @@ export async function insertEvents(events: TerralertEvent[]) {
 async function insertSingleEvent(e: TerralertEvent) {
     if (!e.id) return;
 
-    const existingEvent = await db.getAllAsync(
-        `SELECT id FROM events WHERE id = ?`,
-        [e.id]
-    );
-
-    if (existingEvent) {
-        // Delete old relationships
-        await db.runAsync(`DELETE FROM event_categories WHERE event_id = ?`, [e.id]);
-        await db.runAsync(`DELETE FROM event_sources WHERE event_id = ?`, [e.id]);
-
-        // Delete old geometry + coordinates
-        const geometries = await db.getAllAsync<{ id: number }>(
-            `SELECT id FROM geometry WHERE event_id = ?`,
-            [e.id]
-        );
-
-        for (const g of geometries) {
-            await db.runAsync(`DELETE FROM geometry_coordinates WHERE geometry_id = ?`, [g.id]);
-        }
-
-        await db.runAsync(`DELETE FROM geometry WHERE event_id = ?`, [e.id]);
+    const category = e.categories[0];
+    if (!category?.id) {
+        throw new Error(`Event ${e.id} has no category`);
     }
 
     await db.runAsync(
-        `INSERT OR REPLACE INTO events
-     (id, title, description, link, closed)
-     VALUES (?, ?, ?, ?, ?)`,
-        [e.id, e.title, e.description, e.link, e.closed]
+        `INSERT OR IGNORE INTO categories (id, title)
+     VALUES (?, ?)`,
+        [category.id, category.title]
     );
 
-    // categories
-    for (const c of e.categories) {
-        if (!c.id) continue;
+    await db.runAsync(`DELETE FROM events WHERE id = ?`, [e.id]);
 
-        await db.runAsync(
-            `INSERT OR IGNORE INTO categories (id, title)
-       VALUES (?, ?)`,
-            [c.id, c.title]
-        );
+    await db.runAsync(
+        `INSERT INTO events
+     (id, category_id, title, description, link, closed)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+        [e.id, category.id, e.title, e.description, e.link, e.closed]
+    );
 
-        await db.runAsync(
-            `INSERT OR IGNORE INTO event_categories (event_id, category_id)
-       VALUES (?, ?)`,
-            [e.id, c.id]
-        );
-    }
-
-    // sources
     for (const s of e.sources) {
-        if (!s.id) continue;
-
         await db.runAsync(
-            `INSERT OR IGNORE INTO sources (id, url)
-       VALUES (?, ?)`,
-            [s.id, s.url]
-        );
-
-        await db.runAsync(
-            `INSERT OR IGNORE INTO event_sources (event_id, source_id)
-       VALUES (?, ?)`,
-            [e.id, s.id]
+            `INSERT INTO sources (event_id, id, url)
+             VALUES (?, ?, ?)`,
+            [e.id, s.id, s.url]
         );
     }
 
-    // geometry
     for (const g of e.geometry) {
         const res = await db.runAsync(
             `INSERT INTO geometry
-       (event_id, magnitude_value, magnitude_unit, date, type)
-       VALUES (?, ?, ?, ?, ?)`,
-            [
-                e.id,
-                g.magnitudeValue,
-                g.magnitudeUnit,
-                g.date,
-                g.type,
-            ]
+                 (event_id, magnitude_value, magnitude_unit, date, type)
+             VALUES (?, ?, ?, ?, ?)`,
+            [e.id, g.magnitudeValue, g.magnitudeUnit, g.date, g.type]
         );
 
-        const geometryId = res.lastInsertRowId;
-
-        await insertGeometryCoordinates(geometryId, g.coordinates);
+        await insertGeometryCoordinates(res.lastInsertRowId, g.coordinates);
     }
 }
 
@@ -159,20 +114,20 @@ export async function getEventsForRegionYearCategory(
     // SQL to select events that match the category and have geometry coordinates inside the bounding box
     const eventRows = await db.getAllAsync<{
         id: string;
+        category_id: string;
         title: string | null;
         description: string | null;
         link: string | null;
         closed: string | null;
     }>(`
-    SELECT DISTINCT e.*
-    FROM events e
-    JOIN event_categories ec ON ec.event_id = e.id
-    JOIN geometry g ON g.event_id = e.id
-    JOIN geometry_coordinates gc ON gc.geometry_id = g.id
-    WHERE ec.category_id = ?
-      AND gc.latitude BETWEEN ? AND ?
-      AND gc.longitude BETWEEN ? AND ?
-      AND strftime('%Y', g.date) = ?
+        SELECT DISTINCT e.*
+        FROM events e
+                 JOIN geometry g ON g.event_id = e.id
+                 JOIN geometry_coordinates gc ON gc.geometry_id = g.id
+        WHERE e.category_id = ?
+          AND gc.latitude BETWEEN ? AND ?
+          AND gc.longitude BETWEEN ? AND ?
+          AND strftime('%Y', g.date) = ?
   `, [
         categoryId,
         region.minLatitude,
@@ -194,20 +149,20 @@ export async function getEventsByCategory(
 ): Promise<TerralertEvent[]> {
 
     const whereClosed = options?.onlyOpen
-        ? 'AND e.closed IS NULL'
+        ? 'AND closed IS NULL'
         : '';
 
     const events = await db.getAllAsync<{
         id: string;
+        category_id: string;
         title: string | null;
         description: string | null;
         link: string | null;
         closed: string | null;
     }>(`
-    SELECT DISTINCT e.*
-    FROM events e
-    JOIN event_categories ec ON ec.event_id = e.id
-    WHERE ec.category_id = ?
+        SELECT *
+        FROM events
+        WHERE category_id = ?
     ${whereClosed}
   `, [categoryId]);
 
@@ -219,6 +174,7 @@ export async function getEventsByCategory(
 async function hydrateEvents(
     baseEvents: {
         id: string;
+        category_id: string;
         title: string | null;
         description: string | null;
         link: string | null;
@@ -231,15 +187,9 @@ async function hydrateEvents(
 
     // categories
     const categories = await db.getAllAsync<{
-        event_id: string;
         id: string;
         title: string | null;
-    }>(`
-    SELECT ec.event_id, c.id, c.title
-    FROM event_categories ec
-    JOIN categories c ON c.id = ec.category_id
-    WHERE ec.event_id IN (${placeholders})
-  `, eventIds);
+    }>(`SELECT * FROM categories`);
 
     // sources
     const sources = await db.getAllAsync<{
@@ -247,11 +197,10 @@ async function hydrateEvents(
         id: string;
         url: string | null;
     }>(`
-    SELECT es.event_id, s.id, s.url
-    FROM event_sources es
-    JOIN sources s ON s.id = es.source_id
-    WHERE es.event_id IN (${placeholders})
-  `, eventIds);
+        SELECT event_id, id, url
+        FROM sources
+        WHERE event_id IN (${placeholders})
+    `, eventIds);
 
     // geometry + coordinates
     const geometryRows = await db.getAllAsync<{
@@ -295,10 +244,15 @@ function assembleEvents(
     geometryRows: any[]
 ): TerralertEvent[] {
 
+    const categoryMap = new Map(
+        categories.map(c => [c.id, new Category(c.id, c.title)])
+    );
+
     return baseEvents.map(e => {
-        const eventCategories = categories
-            .filter(c => c.event_id === e.id)
-            .map(c => new Category(c.id, c.title));
+        const category = categoryMap.get(e.category_id);
+        if (!category) {
+            console.warn(`Missing category ${e.category_id} for event ${e.id}`);
+        }
 
         const eventSources = sources
             .filter(s => s.event_id === e.id)
@@ -312,7 +266,7 @@ function assembleEvents(
             e.description,
             e.link,
             e.closed,
-            eventCategories,
+            category ? [category] : [],
             eventSources,
             geometries
         );
@@ -351,5 +305,30 @@ function buildGeometry(rows: any[]): TerralertGeometry[] {
     });
 }
 
-
+export async function deleteEventsForRegionYearCategory(
+    region: TerralertRegion,
+    year: number,
+    categoryId: string
+) {
+    await db.runAsync(`
+        DELETE FROM events
+        WHERE id IN (
+            SELECT DISTINCT e.id
+            FROM events e
+                     JOIN geometry g ON g.event_id = e.id
+                     JOIN geometry_coordinates gc ON gc.geometry_id = g.id
+            WHERE e.category_id = ?
+              AND gc.latitude BETWEEN ? AND ?
+              AND gc.longitude BETWEEN ? AND ?
+              AND strftime('%Y', g.date) = ?
+        )
+    `, [
+        categoryId,
+        region.minLatitude,
+        region.maxLatitude,
+        region.minLongitude,
+        region.maxLongitude,
+        year.toString()
+    ]);
+}
 

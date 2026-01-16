@@ -163,6 +163,8 @@ export default function Terralert() {
         setComparisonActive(false);
         onRegionChange(null);
         toggleHistoryMenuVisibility(false);
+        toggleDetailViewVisibility(false);
+        setSelectedMarker(null);
         resetMapToUserLocation();
         setMarkers(prev => [...prev]);
     }

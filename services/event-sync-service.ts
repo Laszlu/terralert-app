@@ -1,4 +1,9 @@
-import {insertEvents, isRegionYearSynced, markRegionYearSynced} from "@/repositories/event-repository";
+import {
+    deleteEventsForRegionYearCategory,
+    insertEvents,
+    isRegionYearSynced,
+    markRegionYearSynced
+} from "@/repositories/event-repository";
 import {getCurrentEvents, getEventsByCategoryRegionAndYear} from "@/api/terralert-client";
 import {CategoryState} from "@/components/category-state-context";
 import {TerralertRegion} from "@/helper/terralert-region-helper";
@@ -23,6 +28,7 @@ export async function syncRegionYear(region: TerralertRegion, year: number, cate
         return;
     }
 
+    await deleteEventsForRegionYearCategory(region, year, categoryId);
     await insertEvents(events);
     await markRegionYearSynced(region, year, categoryId);
 }

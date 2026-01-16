@@ -21,9 +21,11 @@ export function EventDetailView(props: EventDetailViewProps) {
 
     const parsedDateTime = props.marker.date !== null ? parseDateFromMarker(props.marker.date!) : null;
 
+    const sources = props.marker.event?.sources.filter(s => s.url !== null)
+
     const url = props.marker.event?.sources[0].url
 
-    const handleSourceButtonPressed = useCallback(async () => {
+    const handleSourceButtonPressed = useCallback(async (url: string) => {
         const supported = await Linking.canOpenURL(url!);
 
         if (supported) {
@@ -31,7 +33,7 @@ export function EventDetailView(props: EventDetailViewProps) {
         } else {
             console.warn('Cannot open URL: ' + url);
         }
-    }, [url])
+    }, [])
 
     return(
         <View style={[
@@ -125,14 +127,38 @@ export function EventDetailView(props: EventDetailViewProps) {
                     {props.marker.magnitudeValue} {props.marker.magnitudeUnit}
                 </ThemedText>
             </View>
-            {url &&
-                <View style={[
+            {sources &&
+                <View
+                    style={[
                     styles.detailViewButtonRow,
                     {
                         paddingTop: responsiveScaling.scale(10),
                     }
                 ]}>
-                    <ThemedButton title={'SOURCE'} iconName={'info'} iconLibrary={'MaterialIcons'} onPress={() => {handleSourceButtonPressed()}} selected={false}/>
+                    <ThemedText style={[
+                        styles.detailViewRowContentLeft
+                    ]}>
+                        SOURCES:
+                    </ThemedText>
+                    <View
+                    style={[
+                        styles.detailViewRowContentRight,
+                        {
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            gap: 15
+                        }
+                    ]}>
+                        {sources.map((s, index) => (
+                            <ThemedButton
+                                key={index}
+                                title={s.id ? s.id!.toUpperCase() : 'SOURCE'}
+                                iconName={'info'}
+                                iconLibrary={'MaterialIcons'}
+                                onPress={() => {handleSourceButtonPressed(s.url!)}}
+                                selected={false}/>
+                        ))}
+                    </View>
                 </View>
             }
         </View>
@@ -169,7 +195,7 @@ const styles = StyleSheet.create({
     detailViewButtonRow: {
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         width: '100%',
     },
 })

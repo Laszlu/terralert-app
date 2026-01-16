@@ -1,3 +1,5 @@
+export const CURRENT_DB_VERSION = 3;
+
 export const MIN_YEAR = 2016;
 
 export const MAX_COORD_JUMP = 8;
