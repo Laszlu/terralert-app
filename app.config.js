@@ -2,7 +2,7 @@ export default ({ config }) => ({
     ...config,
     name: "TERRALERT",
     slug: "TERRALERT",
-    version: "1.1.0",
+    version: "1.2.0",
     orientation: "portrait",
     icon: "./assets/images/terralert_icon.png",
     scheme: "terralert",

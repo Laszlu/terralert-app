@@ -347,17 +347,14 @@ export default function Terralert() {
         if (comparisonActive) return;
         if (region !== null) return;
 
-        console.log('Attempting to move to first event');
-
         // Use a timeout to ensure MapView is fully mounted and ready
         const timer = setTimeout(() => {
             if (mapRef.current) {
-                console.log('Moving to first event');
                 moveMapToFirstEvent(eventData);
             } else {
                 console.log('MapRef not ready yet');
             }
-        }, 500); // Increase from 300 to 500ms for more reliability
+        }, 500);
 
         return () => clearTimeout(timer);
     }, [eventData, comparisonActive, region, category.category]);

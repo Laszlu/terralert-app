@@ -256,11 +256,8 @@ export function getMarkerForEvent(event: TerralertEvent): TerralertMapMarker | n
 export function getMarkersForHistoryEvents(events: TerralertEvent[], year: number): TerralertMapMarker[] {
     const markers: TerralertMapMarker[] = [];
 
-    console.log("creating comparison markers for: " + year);
-
     events.forEach(event => {
         if (!event.geometry || event.geometry.length === 0) {
-            console.log("skipping because of missing geometries")
             return [];
         }
 
