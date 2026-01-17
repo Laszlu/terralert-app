@@ -49,8 +49,6 @@ export function EventDetailView(props: EventDetailViewProps) {
             }
         }
 
-        console.log(searchUrl)
-
         const supported = await Linking.canOpenURL(searchUrl!);
 
         if (supported) {
