@@ -9,6 +9,7 @@ import {ThemedButton} from "@/components/themed-button";
 import React, {useCallback} from "react";
 import * as Linking from 'expo-linking';
 import {IconComponent} from "@/components/icon-component";
+import {GOOGLE_MAIN_URL} from "@/constants/constants";
 
 export type EventDetailViewProps = {
     marker: TerralertMapMarker;
@@ -23,8 +24,6 @@ export function EventDetailView(props: EventDetailViewProps) {
 
     const sources = props.marker.event?.sources.filter(s => s.url !== null)
 
-    const url = props.marker.event?.sources[0].url
-
     const handleSourceButtonPressed = useCallback(async (url: string) => {
         const supported = await Linking.canOpenURL(url!);
 
@@ -32,6 +31,32 @@ export function EventDetailView(props: EventDetailViewProps) {
             await Linking.openURL(url!);
         } else {
             console.warn('Cannot open URL: ' + url);
+        }
+    }, [])
+
+    const name = props.marker.event?.title
+
+    const handleSearchButtonPressed = useCallback(async (name: string) => {
+        let nameParts = name.split(" ");
+
+        let searchUrl = GOOGLE_MAIN_URL + "?q=";
+
+        for (const part of nameParts) {
+            searchUrl += part;
+
+            if (!(nameParts.indexOf(part) === nameParts.length - 1)) {
+                searchUrl += "+"
+            }
+        }
+
+        console.log(searchUrl)
+
+        const supported = await Linking.canOpenURL(searchUrl!);
+
+        if (supported) {
+            await Linking.openURL(searchUrl!);
+        } else {
+            console.warn('Cannot open URL: ' + searchUrl);
         }
     }, [])
 
@@ -146,7 +171,7 @@ export function EventDetailView(props: EventDetailViewProps) {
                         {
                             flexDirection: 'row',
                             justifyContent: 'space-between',
-                            gap: 15
+                            gap: 5
                         }
                     ]}>
                         {sources.map((s, index) => (
@@ -162,7 +187,7 @@ export function EventDetailView(props: EventDetailViewProps) {
                             title={'SEARCH'}
                             iconName={'search'}
                             iconLibrary={'MaterialIcons'}
-                            onPress={() => {handleSourceButtonPressed("")}}
+                            onPress={() => {handleSearchButtonPressed(name!)}}
                             selected={false}/>
                     </View>
                 </View>
