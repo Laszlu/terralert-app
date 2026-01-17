@@ -244,8 +244,8 @@ export default function Terralert() {
             {
                 latitude: firstMarker.latitude,
                 longitude: firstMarker.longitude,
-                latitudeDelta: 120,
-                longitudeDelta: 120,
+                latitudeDelta: 110,
+                longitudeDelta: 110,
             },
             700
         );
@@ -261,7 +261,7 @@ export default function Terralert() {
 
     useEffect(() => {
         setRegion(null);
-        resetMapToUserLocation();
+        //resetMapToUserLocation();
     }, [category]);
 
     // loading location
@@ -344,11 +344,24 @@ export default function Terralert() {
     // move map to first event after loading
     useEffect(() => {
         if (!eventData) return;
+        if (eventData.length === 0) return;
         if (comparisonActive) return;
         if (region !== null) return;
 
-        moveMapToFirstEvent(eventData);
-    }, [eventData, comparisonActive, region]);
+        console.log('Attempting to move to first event');
+
+        // Use a timeout to ensure MapView is fully mounted and ready
+        const timer = setTimeout(() => {
+            if (mapRef.current) {
+                console.log('Moving to first event');
+                moveMapToFirstEvent(eventData);
+            } else {
+                console.log('MapRef not ready yet');
+            }
+        }, 500); // Increase from 300 to 500ms for more reliability
+
+        return () => clearTimeout(timer);
+    }, [eventData, comparisonActive, region, category.category]);
 
     // loading markers/polylines for events
     useEffect( () => {
@@ -649,6 +662,7 @@ export default function Terralert() {
 
                 <MapView
                     style={styles.map}
+                    key={`map-${category.category}`}
                     provider={PROVIDER_GOOGLE}
                     ref={mapRef}
                     customMapStyle={[
@@ -721,6 +735,57 @@ export default function Terralert() {
                             strokeWidth={5}
                         />
                     ))}
+                    {categoryRegions.map((r, index) => {
+                        const color = getRegionColor(index);
+                        const coords = makePolygonCoords(r);
+
+                        if (coords.length === 0) {
+                            return null;
+                        }
+
+                        return (
+                            <Polygon
+                                key={`region-${r.name}`}
+                                coordinates={coords}
+                                strokeColor={color}
+                                fillColor={`${color}10`}
+                                strokeWidth={2}
+                                tappable={false}
+                            />
+                        );
+                    })}
+                    {categoryRegions.map((r, index) => {
+                        const color = getRegionColor(index);
+                        const center = getRegionCenter(r);
+                        if (comparisonActive) return null;
+                        return (
+                            <Marker
+                                key={`region-label-${r.name}`}
+                                coordinate={center}
+                                anchor={{ x: 0.5, y: 0.5 }}
+                                tracksViewChanges={false}
+                            >
+                                <ThemedView
+                                    style={{
+                                        backgroundColor: "rgba(0,0,0,0.1)",
+                                        paddingHorizontal: responsiveScaling.scale(6),
+                                        paddingVertical: responsiveScaling.scale(3),
+                                        borderRadius: 10,
+                                    }}
+                                >
+                                    <ThemedText
+                                        style={{
+                                            color: `${color}90`,
+                                            fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 12 : 10),
+                                            fontWeight: "bold",
+                                        }}
+                                    >
+                                        {r.description.toUpperCase()}
+                                    </ThemedText>
+                                </ThemedView>
+                            </Marker>
+                        );
+                    })}
                 </MapView>
             </ThemedView>
 

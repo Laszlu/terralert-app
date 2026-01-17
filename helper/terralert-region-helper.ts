@@ -105,15 +105,43 @@ export function regionToPolygon(region: TerralertRegion): LatLng[] {
 export function makePolygonCoords(region: TerralertRegion) {
     const r = clampRegionLat(region);
 
+    // Ensure we have valid latitude bounds
+    if (!Number.isFinite(r.minLatitude) || !Number.isFinite(r.maxLatitude) ||
+        !Number.isFinite(r.minLongitude) || !Number.isFinite(r.maxLongitude)) {
+        console.error('Invalid region bounds:', r);
+        return [];
+    }
+
     const minLat = Math.min(r.minLatitude, r.maxLatitude);
     const maxLat = Math.max(r.minLatitude, r.maxLatitude);
+
+    // Ensure latitude bounds are different
+    if (Math.abs(maxLat - minLat) < 0.0001) {
+        console.error('Region has zero height:', r);
+        return [];
+    }
 
     let minLon = r.minLongitude;
     let maxLon = r.maxLongitude;
 
-    // Handle dateline crossing
-    if (maxLon < minLon) maxLon += 360;
+    // Normalize longitudes to [-180, 180] range
+    const normalizeLon = (lon: number) => {
+        while (lon > 180) lon -= 360;
+        while (lon < -180) lon += 360;
+        return lon;
+    };
 
+    minLon = normalizeLon(minLon);
+    maxLon = normalizeLon(maxLon);
+
+    // Ensure longitude bounds are different
+    if (Math.abs(maxLon - minLon) < 0.0001) {
+        console.error('Region has zero width:', r);
+        return [];
+    }
+
+    // Build the rectangle - don't try to handle dateline crossing in polygon
+    // React Native Maps handles this automatically
     const coords = [
         { latitude: minLat, longitude: minLon },
         { latitude: minLat, longitude: maxLon },
@@ -121,11 +149,20 @@ export function makePolygonCoords(region: TerralertRegion) {
         { latitude: maxLat, longitude: minLon },
     ];
 
-    // Wrap longitude back to [-180, 180]
-    return coords.map(c => ({
-        latitude: c.latitude,
-        longitude: ((c.longitude + 180) % 360) - 180
-    }));
+    // Final validation
+    const validCoords = coords.filter(c =>
+        Number.isFinite(c.latitude) &&
+        Number.isFinite(c.longitude) &&
+        Math.abs(c.latitude) <= 90 &&
+        Math.abs(c.longitude) <= 180
+    );
+
+    if (validCoords.length !== 4) {
+        console.error('Invalid coordinates generated for region:', r, coords);
+        return [];
+    }
+
+    return validCoords;
 }
 
 

@@ -158,6 +158,12 @@ export function EventDetailView(props: EventDetailViewProps) {
                                 onPress={() => {handleSourceButtonPressed(s.url!)}}
                                 selected={false}/>
                         ))}
+                        <ThemedButton
+                            title={'SEARCH'}
+                            iconName={'search'}
+                            iconLibrary={'MaterialIcons'}
+                            onPress={() => {handleSourceButtonPressed("")}}
+                            selected={false}/>
                     </View>
                 </View>
             }
