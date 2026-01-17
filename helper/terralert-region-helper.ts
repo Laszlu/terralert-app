@@ -1,5 +1,5 @@
 import {LatLng} from "react-native-maps";
-import {pinColors} from "@/constants/constants";
+import {regionColors} from "@/constants/constants";
 
 export interface TerralertRegion {
     name: string;
@@ -167,7 +167,7 @@ export function makePolygonCoords(region: TerralertRegion) {
 
 
 export function getRegionColor(index: number) {
-    const colors = pinColors.filter(c => c.year >= 2015);
+    const colors = regionColors.filter(c => c.year >= 2015);
     return colors[index % colors.length].color;
 }
 

@@ -23,7 +23,6 @@ import {
     getRegionColor,
     getRegionsForCategory, makePolygonCoords,
     regionToBoundingBoxCoords,
-    regionToPolygon,
     TerralertRegion
 } from "@/helper/terralert-region-helper";
 import {MenuActions, MenuBar} from "@/components/menu-bar";
@@ -89,7 +88,7 @@ export default function Terralert() {
     const [activeYears, setActiveYears] = useState<number[]>([])
 
     //Settings
-
+    const [regionHighlightingEnabled, setRegionHighlightingEnabled] = useState(false);
 
     //-------------------
     // Menus
@@ -735,26 +734,29 @@ export default function Terralert() {
                             strokeWidth={5}
                         />
                     ))}
-                    {categoryRegions.map((r, index) => {
-                        const color = getRegionColor(index);
-                        const coords = makePolygonCoords(r);
+                    {regionHighlightingEnabled &&
+                        categoryRegions.map((r, index) => {
+                            const color = getRegionColor(index);
+                            const coords = makePolygonCoords(r);
 
-                        if (coords.length === 0) {
-                            return null;
-                        }
+                            if (coords.length === 0) {
+                                return null;
+                            }
 
-                        return (
-                            <Polygon
-                                key={`region-${r.name}`}
-                                coordinates={coords}
-                                strokeColor={color}
-                                fillColor={`${color}10`}
-                                strokeWidth={2}
-                                tappable={false}
-                            />
-                        );
-                    })}
-                    {categoryRegions.map((r, index) => {
+                            return (
+                                <Polygon
+                                    key={`region-${r.name}`}
+                                    coordinates={coords}
+                                    strokeColor={color}
+                                    fillColor={`${color}10`}
+                                    strokeWidth={2}
+                                    tappable={false}
+                                />
+                            );
+                        })
+                    }
+                    {regionHighlightingEnabled &&
+                        categoryRegions.map((r, index) => {
                         const color = getRegionColor(index);
                         const center = getRegionCenter(r);
                         if (comparisonActive) return null;
@@ -767,7 +769,7 @@ export default function Terralert() {
                             >
                                 <ThemedView
                                     style={{
-                                        backgroundColor: "rgba(0,0,0,0.1)",
+                                        backgroundColor: "rgba(0,0,0,0.2)",
                                         paddingHorizontal: responsiveScaling.scale(6),
                                         paddingVertical: responsiveScaling.scale(3),
                                         borderRadius: 10,
@@ -841,7 +843,9 @@ export default function Terralert() {
                     styles.optionsContainer,
                     settingsMenuVisibility ? styles.display_true : styles.display_false
                 ]}>
-                    <SettingsMenu/>
+                    <SettingsMenu
+                        setRegionHighlightingEnabled={setRegionHighlightingEnabled}
+                        regionHighlightingEnabled={regionHighlightingEnabled}/>
                 </ThemedView>
                 <ThemedView style={[
                     styles.optionsContainer,

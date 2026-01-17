@@ -6,7 +6,12 @@ import React from "react";
 import {useMyTheme} from "@/hooks/useCustomTheme";
 import {useResponsiveScaling} from "@/hooks/use-responsive-scaling";
 
-export function SettingsMenu() {
+type SettingsMenuProps = {
+    regionHighlightingEnabled: boolean;
+    setRegionHighlightingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export function SettingsMenu(props: SettingsMenuProps) {
     const { mode, setMode } = useThemeMode();
     const {colors} = useMyTheme();
     const responsiveScaling = useResponsiveScaling();
@@ -18,6 +23,14 @@ export function SettingsMenu() {
             setMode('highContrast')
         } else {
             setMode('system')
+        }
+    }
+
+    const handleRegionHighlightSwitchToggled = (value: boolean) => {
+        if (value) {
+            props.setRegionHighlightingEnabled(true)
+        } else {
+            props.setRegionHighlightingEnabled(false)
         }
     }
 
@@ -47,6 +60,27 @@ export function SettingsMenu() {
                 <Switch
                     value={highContrastEnabled}
                     onValueChange={ value =>  {handleContrastSwitchToggled(value)} }
+                ></Switch>
+            </View>
+            <View style={[
+                styles.settingsMenuRow,
+                {
+                    paddingVertical: responsiveScaling.scale(10),
+                    paddingHorizontal: responsiveScaling.scale(15),
+                }
+            ]}>
+                <ThemedText style={[
+                    styles.settingsMenuText,
+                    {
+                        fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 18 : 16),
+                        marginHorizontal: responsiveScaling.scale(5),
+                    }
+                ]}>
+                    ENABLE REGION HIGHLIGHTING:
+                </ThemedText>
+                <Switch
+                    value={props.regionHighlightingEnabled}
+                    onValueChange={ value =>  {handleRegionHighlightSwitchToggled(value)} }
                 ></Switch>
             </View>
         </ThemedView>
