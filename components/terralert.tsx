@@ -1,6 +1,6 @@
 import 'react-native-reanimated';
 import {ThemedView} from "@/components/themed-view";
-import {ActivityIndicator, Platform, Pressable, StyleSheet} from "react-native";
+import {ActivityIndicator, Platform, Pressable, StyleSheet, Text, View} from "react-native";
 import MapView, {Callout, Marker, Polyline, PROVIDER_GOOGLE, Polygon} from "react-native-maps";
 import {OptionItem, OptionsStack} from "@/components/option-stack";
 import {useEffect, useMemo, useRef, useState} from "react";
@@ -764,24 +764,51 @@ export default function Terralert() {
                                 anchor={{ x: 0.5, y: 0.5 }}
                                 tracksViewChanges={false}
                             >
-                                <ThemedView
-                                    style={{
-                                        backgroundColor: "rgba(0,0,0,0.2)",
-                                        paddingHorizontal: responsiveScaling.scale(6),
-                                        paddingVertical: responsiveScaling.scale(3),
-                                        borderRadius: 10,
-                                    }}
-                                >
-                                    <ThemedText
+                                {Platform.OS === 'ios' ? (
+                                    <ThemedView
                                         style={{
-                                            color: `${color}90`,
-                                            fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 12 : 10),
-                                            fontWeight: "bold",
+                                            backgroundColor: "rgba(0,0,0,0.2)",
+                                            paddingHorizontal: responsiveScaling.scale(6),
+                                            paddingVertical: responsiveScaling.scale(3),
+                                            borderRadius: 10,
                                         }}
                                     >
-                                        {r.description.toUpperCase()}
-                                    </ThemedText>
-                                </ThemedView>
+                                        <ThemedText
+                                            style={{
+                                                color: color,
+                                                fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 12 : 10),
+                                                fontWeight: "bold",
+                                            }}
+                                        >
+                                            {r.description.toUpperCase()}
+                                        </ThemedText>
+                                    </ThemedView>
+                                ) : (
+                                    <View
+                                        style={{
+                                            backgroundColor: "rgba(0,0,0,0.2)",
+                                            paddingHorizontal: responsiveScaling.scale(6),
+                                            paddingVertical: responsiveScaling.scale(3),
+                                            borderRadius: 10,
+                                            minWidth: 50,
+                                            minHeight: 22,
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            flexDirection: 'row',
+                                        }}
+                                    >
+                                        <Text
+                                            style={{
+                                                color: color,
+                                                fontSize: responsiveScaling.font(responsiveScaling.isTablet ? 12 : 9),
+                                                fontWeight: "bold",
+                                                lineHeight: 20
+                                            }}
+                                        >
+                                            {r.description.toUpperCase()}
+                                        </Text>
+                                    </View>
+                                )}
                             </Marker>
                         );
                     })}
